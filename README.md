@@ -4,6 +4,8 @@ HDC（OpenHarmony Device Connector） 是为鸿蒙开发/测试人员提供的�
 
 持续更新中，欢迎提 PR 和 Issue 补充指正，觉得有用的可以将 GitHub 仓库 Star 收藏备用。
 
+# Table of Contents
+- [Table of Contents](#table-of-contents)
 - [HDC架构](#hdc架构)
 - [HDC安装](#hdc安装)
 - [基本用法](#基本用法)
@@ -48,7 +50,7 @@ HDC（OpenHarmony Device Connector） 是为鸿蒙开发/测试人员提供的�
 hdc主要有三部分组成：
 1. hdc client部分：运行于电脑上的客户端，用户可以在电脑命令终端（windows cmd/linux shell）下请求执行相应的hdc命令。
 2. hdc server部分：作为后台进程也运行于电脑上，server管理client和设备端daemon之间通信包括连接的复用、数据通信包的收发，以及个别本地命令的直接处理。
-3. hdc daemon部分：daemon部署于OpenHarmony设备端作为守护进程来按需运行，负责处理来自client端的请求。
+3. hdc daemon部分：daemon部署于OpenHarmony设备端作为守护进程按需运行，负责处理来自client端请求。
 
 ![avatar](/docs/arch.png)
 整体架构和Android系统的ADB架构非常类似。
