@@ -4,6 +4,8 @@ HDC（OpenHarmony Device Connector） 是为鸿蒙开发/测试人员提供的�
 
 持续更新中，欢迎提 PR 和 Issue 补充指正，觉得有用的可以将 GitHub 仓库 Star 收藏备用。
 
+# 目录
+[TOC]
 
 # HDC架构
 hdc主要有三部分组成：
