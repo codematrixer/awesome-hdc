@@ -50,7 +50,8 @@ hdc主要有三部分组成：
 2. hdc server部分：作为后台进程也运行于电脑上，server管理client和设备端daemon之间通信包括连接的复用、数据通信包的收发，以及个别本地命令的直接处理。
 3. hdc daemon部分：daemon部署于OpenHarmony设备端作为守护进程来按需运行，负责处理来自client端的请求。
 
-整体架构和android系统的adb类似。
+![avatar](/docs/arch.png)
+整体架构和Android系统的ADB架构非常类似。
 
 # HDC安装
 - 通过访问社区网站（http://ci.openharmony.cn/workbench/cicd/dailybuild/dailylist） 下载ohos-sdk-public或正式发布的sdk压缩包
@@ -696,6 +697,7 @@ $ hdc file recv  /data/local/tmp/layout/record.csv ~/record.csv
 
 # 屏幕截图
 hdc提供了两种截图命令
+
 方式一
 ```
 $ hdc shell uitest screenCap
