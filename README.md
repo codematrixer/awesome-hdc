@@ -4,8 +4,45 @@ HDC（OpenHarmony Device Connector） 是为鸿蒙开发/测试人员提供的�
 
 持续更新中，欢迎提 PR 和 Issue 补充指正，觉得有用的可以将 GitHub 仓库 Star 收藏备用。
 
-# 目录
-[TOC]
+- [HDC架构](#hdc架构)
+- [HDC安装](#hdc安装)
+- [基本用法](#基本用法)
+  - [基本语法](#基本语法)
+- [设备连接管理](#设备连接管理)
+  - [查看版本](#查看版本)
+  - [启动/停止 HDC Server](#启动停止-hdc-server)
+  - [查询设备列表](#查询设备列表)
+  - [查询设备UDID](#查询设备udid)
+  - [重启手机](#重启手机)
+- [应用管理](#应用管理)
+  - [安装应用](#安装应用)
+  - [卸载应用](#卸载应用)
+  - [获取应用列表](#获取应用列表)
+  - [启动应用](#启动应用)
+  - [退出应用](#退出应用)
+  - [Dump应用信息](#dump应用信息)
+    - [获取应用 Ability信息](#获取应用-ability信息)
+    - [获取应用详情](#获取应用详情)
+  - [清除应用数据](#清除应用数据)
+    - [清除应用缓存](#清除应用缓存)
+    - [清除应用数据](#清除应用数据-1)
+  - [显示可调试应用列表](#显示可调试应用列表)
+- [端口转发](#端口转发)
+- [文件传输](#文件传输)
+  - [从本地电脑发送文件至手机](#从本地电脑发送文件至手机)
+  - [从手机拷贝文件至本地电脑](#从手机拷贝文件至本地电脑)
+- [uitest指令](#uitest指令)
+  - [UI模拟操作](#ui模拟操作)
+  - [获取页面布局信息（控件树）](#获取页面布局信息控件树)
+  - [录制用户操作](#录制用户操作)
+- [查看设备信息](#查看设备信息)
+- [屏幕截图](#屏幕截图)
+- [屏幕录屏](#屏幕录屏)
+- [设备日志](#设备日志)
+- [Instrument Test](#instrument-test)
+- [性能工具](#性能工具)
+- [参考链接](#参考链接)
+
 
 # HDC架构
 hdc主要有三部分组成：
@@ -16,8 +53,9 @@ hdc主要有三部分组成：
 整体架构和android系统的adb类似。
 
 # HDC安装
-● 通过访问社区网站（http://ci.openharmony.cn/workbench/cicd/dailybuild/dailylist） 下载ohos-sdk-public或正式发布的sdk压缩包
-● 配置电脑环境变量, 以macOS为例，在`~/.bash_profile` 或者 `~/.zshrc`文件中添加如下内容：
+- 通过访问社区网站（http://ci.openharmony.cn/workbench/cicd/dailybuild/dailylist） 下载ohos-sdk-public或正式发布的sdk压缩包
+
+- 配置电脑环境变量, 以macOS为例，在`~/.bash_profile` 或者 `~/.zshrc`文件中添加如下内容：
 ```
 export PATH=$PATH:/Users/Huawei/Sdk/hmscore/4.2.1/toolchains        //请以sdk实际安装目录为准 
 export HDC_SERVER_PORT=7035
@@ -47,8 +85,9 @@ AppMod finish
 ```
 
 **注意事项**
-● 使用`hdc`，如果出现异常，可以尝试通过`hdc kill -r`命令杀掉并重启hdc服务。
-● 如果出现`hdc list targets`获取不到设备信息的情况，可以通过任务管理器查看是否有hdc进程存在。若进程存在，则通过`hdc kill -r`命令杀掉该进程。
+
+-  使用`hdc`，如果出现异常，可以尝试通过`hdc kill -r`命令杀掉并重启hdc服务。
+-  如果出现`hdc list targets`获取不到设备信息的情况，可以通过任务管理器查看是否有hdc进程存在。若进程存在，则通过`hdc kill -r`命令杀掉该进程。
 
 # 设备连接管理
 ## 查看版本
@@ -167,8 +206,11 @@ ID: 100:
 hdc shell aa start -a {abilityName} -b {bundleName} 
 
 ```
-● 其中`bundleName`可以通过`hdc shell bm dump -a`获取
-● 其中`abilityName`可以通过如下命令获取（查看当前任务栈的ability信息）
+
+-  其中`bundleName`可以通过`hdc shell bm dump -a`获取
+
+-  其中`abilityName`可以通过如下命令获取（查看当前任务栈的ability信息）
+
 ```
 $ hdc shell aa dump -l    # 运行命令前需要手动打开app
 
@@ -194,7 +236,9 @@ User ID #100
 ```
 hdc shell aa force-stop {bundleName} 
 ```
-● 其中`bundleName`可以通过`hdc shell bm dump -a`获取
+
+-  其中`bundleName`可以通过`hdc shell bm dump -a`获取
+
 
 ## Dump应用信息
 **aa dump**
@@ -398,7 +442,9 @@ $ hdc track-jpid
 |rport rm local remote|	删除指定“端口转发设备侧端口转发数据到主机端口”的转发任务|
 
 **举例**
-● 展示电脑端口转发到手机端口的列表
+
+- 展示电脑端口转发到手机端口的列表
+
 ```
 $ hdc fport ls
 
@@ -406,7 +452,7 @@ FMR0223C13000649    tcp:7912 tcp:7912    [Forward]
 ```
 
 
-● 将本地电脑的7913端口转发到手机7912端口
+- 将本地电脑的7913端口转发到手机7912端口
 ```
 $ hdc fport tcp:7913 tcp:7912
 
@@ -415,7 +461,7 @@ Forwardport result:OK
 
 这个命令非常实用，比如我再手机上实现了一个 `http`服务，没有这个命令前需要通过手机`ip:port`来访问，这就需要提前知道手机的`wlanIP`，执行这个命令后可以直接通过`localhost:localPort`来访问手机里的服务。
 
-● 删除端口转发任务
+-  删除端口转发任务
 ```
 $ hdc fport rm tcp:7913 tcp:7912
 Remove forward ruler success, ruler:tcp:7913 tcp:7912
@@ -424,7 +470,7 @@ $ hdc fport ls
 [Empty]
 ```
 
-● 展示端口映射列表
+-  展示端口映射列表
 ```
 $ hdc fport ls
 
@@ -539,7 +585,7 @@ $ hdc shell uitest dumpLayout -p {saveDumpPath}   # 运行命令前需要手动�
 
 DumpLayout saved to:/data/local/tmp/layout_407568854.json
 ```
-● `-p`表示控件树保存的目录，如果不指定，则默认保存在手机的`/data/local/tmp`目录
+-  `-p`表示控件树保存的目录，如果不指定，则默认保存在手机的`/data/local/tmp`目录
 `/data/local/tmp/layout_407568854.json`文件内容如下：
 ```
 {
