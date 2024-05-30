@@ -1,8 +1,7 @@
->由于鸿蒙生态还处于初期，官方提供的hdc命令还在不断修改中，部分命令会有改动，如果文档没来得及更新，欢迎大家补充。
-
 HDC（OpenHarmony Device Connector） 是为鸿蒙开发/测试人员提供的用于设备调试的命令行工具，类似Android端的ADB工具。
 
-持续更新中，欢迎提 PR 和 Issue 补充指正，觉得有用的可以将 GitHub 仓库 Star⭐️ 收藏备用。
+>由于鸿蒙生态还处于初期，官方提供的hdc命令还在不断修改中，部分命令会有变动。
+>如果文档没来得及更新，欢迎大家提PR和Issue补充指正，觉得有用的可以点 Star⭐️收藏。
 
 # Table of Contents
 - [Table of Contents](#table-of-contents)
