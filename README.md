@@ -702,8 +702,9 @@ $ hdc fport ls
 同理，`rport`命令表示手机端口转发到电脑端口，我就不一一举例了.
 
 # 无线调试
-1. 在手机上开启5555端口：`hdc -t {SERIAL} tmode port {PORT}`
-2. 连接手机上的端口：`hdc  -t {SERIAL} tconn {WLANIP}:{PORT}`
+1. 在手机上开启5555端口 `hdc -t {SERIAL} tmode port {PORT}`
+2. 连接手机上的端口 `hdc  -t {SERIAL} tconn {WLANIP}:{PORT}`
+3. 恢复手机USB连接 `hdc -t {SERIAL} tmode usb`
 
 **示例**
 
@@ -715,6 +716,9 @@ Connect OK
 
 $ hdc list targets
 172.31.124.84:5555
+
+$ hdc tmode usb      
+Set device run mode successful.
 
 ```
 
