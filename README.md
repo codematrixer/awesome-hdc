@@ -979,7 +979,7 @@ usage:
   -e                          |faultlogs of crash history
   --net [pid]                 |dump network information; if pid is specified, dump traffic usage of specified pid
   --storage [pid]             |dump storage information; if pid is specified, dump /proc/pid/io
-  -p                          |processes information, include list and infromation of processes and threads
+  -p                          |processes information, include list and information of processes and threads
   -p [pid]                    |dump threads under pid, includes smap, block channel, execute time, mountinfo
   --cpuusage [pid]            |dump cpu usage by processes and category; if PID is specified, dump category usage of specified pid
   --cpufreq                   |dump real CPU frequency of each core
