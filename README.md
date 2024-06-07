@@ -44,6 +44,7 @@ HDC（OpenHarmony Device Connector） 是为鸿蒙开发/测试人员提供的�
   - [显示端口转发列表](#显示端口转发列表)
   - [本地端口转发到手机](#本地端口转发到手机)
   - [删除端口转发任务](#删除端口转发任务)
+- [无线调试](#无线调试)
 - [文件传输](#文件传输)
   - [从本地电脑发送文件至手机](#从本地电脑发送文件至手机)
   - [从手机拷贝文件至本地电脑](#从手机拷贝文件至本地电脑)
@@ -545,6 +546,9 @@ screen[0]: id=0, powerstatus=POWER_STATUS_OFF, backlight=51, screenType=EXTERNAL
 $ hdc shell ip address show
 ```
 
+后来发现这个命令再最新的系统上实现，提示`Cannot open netlink socket: Permission denied`, 正在联系鸿蒙方，等待更新。
+先记个TODO吧。
+
 ## 电量/温度
 
 ```
@@ -656,6 +660,7 @@ Peripherals Info:
   Proximity: Enabled=0 Status=0
 ```
 
+
 # 端口转发
 |命令|	说明|
 |---|---|
@@ -696,6 +701,28 @@ $ hdc fport ls
 
 同理，`rport`命令表示手机端口转发到电脑端口，我就不一一举例了.
 
+# 无线调试
+1. 在手机上开启5555端口：`hdc -t {SERIAL} tmode port {PORT}`
+2. 连接手机上的端口：`hdc  -t {SERIAL} tconn {WLANIP}:{PORT}`
+
+**示例**
+
+```
+$ hdc tmode port 5555
+
+$ hdc tconn 172.31.124.84:5555
+Connect OK
+
+$ hdc list targets
+172.31.124.84:5555
+
+```
+
+不过目前这个无线调试，会导致该手机USB连接方式断开，导致无法进行端口转发，每次进行无线调试时，需要知道手机的wlanip才行。
+这个问题也在和鸿蒙方沟通，待解决。
+记个TODO.
+
+
 # 文件传输
 |命令|	说明|
 |--|--|
@@ -734,17 +761,17 @@ $ hdc shell uitest help
 
 ## UI模拟操作
 支持操作类型：`点击` `双击` `长按` `慢滑` `快滑` `拖拽` `输入文字` `KeyEvent`
-| 配置参数名   | 配置参数含义                                 | 配置参数取值                                                                                                                                     | 示例                                                              |
-|--------------|----------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
-| click        | 模拟单击操作                                 | point_x (必选参数, 点击x坐标点) point_y (必选参数, 点击y坐标点)                                                                                     | hdc shell uitest uiInput click point_x point_y                    |
-| doubleClick  | 模拟双击操作                                 | point_x (必选参数, 双击x坐标点) point_y (必选参数, 双击y坐标点)                                                                                     | hdc shell uitest uiInput doubleClick point_x point_y              |
-| longClick    | 模拟长按操作                                 | point_x (必选参数, 长按x坐标点) point_y (必选参数, 长按y坐标点)                                                                                      | hdc shell uitest uiInput longClick point_x point_y                |
-| fling        | 模拟快滑操作                                 | from_x (必选参数, 滑动起点x坐标) from_y (必选参数, 滑动起点y坐标) to_x (必选参数, 滑动终点x坐标) to_y (必选参数, 滑动终点y坐标) swipeVelocityPps_ (可选参数, 滑动速度, 取值范围: 200-40000, 默认值: 600, 单位: px/s) stepLength (可选参数, 滑动步长, 默认值: 滑动距离/50, 单位: px) | hdc shell uitest uiInput fling from_x from_y to_x to_y swipeVelocityPps_ stepLength |
-| swipe        | 模拟慢滑操作                                 | from_x (必选参数, 滑动起点x坐标) from_y (必选参数, 滑动起点y坐标) to_x (必选参数, 滑动终点x坐标) to_y (必选参数, 滑动终点y坐标) swipeVelocityPps_ (可选参数, 滑动速度, 取值范围: 200-40000, 默认值: 600, 单位: px/s)                                      | hdc shell uitest uiInput swipe from_x from_y to_x to_y swipeVelocityPps_             |
-| drag         | 模拟拖拽操作                                 | from_x (必选参数, 拖拽起点x坐标) from_y (必选参数, 拖拽起点y坐标) to_x (必选参数, 拖拽终点x坐标) to_y (必选参数, 拖拽终点y坐标) swipeVelocityPps_ (可选参数, 滑动速度, 取值范围: 200-40000, 默认值: 600, 单位: px/s)                                         | hdc shell uitest uiInput drag from_x from_y to_x to_y swipeVelocityPps_               |
-| dircFling    | 模拟指定方向滑动操作                         | direction (可选参数, 滑动方向, 可选值: [0,1,2,3], 滑动方向: [左, 右, 上, 下], 默认值: 0) swipeVelocityPps_ (可选参数, 滑动速度, 取值范围: 200-40000, 默认值: 600, 单位: px/s) stepLength (可选参数, 滑动步长, 默认值: 滑动距离/50, 单位: px)          | hdc shell uitest uiInput dircFling direction swipeVelocityPps_ stepLength             |
-| inputText    | 模拟输入框输入文本操作                       | point_x (必选参数, 输入框x坐标点) point_y (必选参数, 输入框y坐标点) input (输入文本)                                                                 | hdc shell uitest uiInput inputText point_x point_y text           |
-| keyEvent     | 模拟实体按键事件(如: 键盘, 电源键, 返回上一级, 返回桌面等), 以及组合按键操作 | keyID (必选参数, 实体按键对应ID) keyID2 (可选参数, 实体按键对应ID)                                                                                 | hdc shell uitest uiInput keyEvent keyID keyID2                    |
+| 配置参数名  | 配置参数含义                              | 配置参数取值                                                                                                                                                       | 示例                                                                                             |
+|-------------|-------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| click       | 模拟单击操作                              | point_x (必选参数,点击x坐标点)<br>point_y (必选参数,点击y坐标点)                                                                                                   | hdc shell uitest uiInput click point_x point_y                                                   |
+| doubleClick | 模拟双击操作                              | point_x (必选参数,双击x坐标点)<br>point_y (必选参数,双击y坐标点)                                                                                                  | hdc shell uitest uiInput doubleClick point_x point_y                                             |
+| longClick   | 模拟长按操作                              | point_x (必选参数,长按x坐标点)<br>point_y (必选参数,长按y坐标点)                                                                                                  | hdc shell uitest uiInput longClick point_x point_y                                               |
+| fling       | 模拟快滑操作                              | from_x (必选参数,滑动起点x坐标)<br>from_y(必选参数,滑动起点y坐标)<br>to_x(必选参数,滑动终点x坐标)<br>to_y(必选参数,滑动终点y坐标)<br>swipeVelocityPps_ (可选参数,滑动速度,取值范围: 200-40000, 默认值: 600, 单位: px/s)<br>stepLength(可选参数,滑动步长,默认值:滑动距离/50, 单位: px) | hdc shell uitest uiInput fling from_x from_y to_x to_y swipeVelocityPps_ stepLength               |
+| swipe       | 模拟慢滑操作                              | from_x (必选参数,滑动起点x坐标)<br>from_y(必选参数,滑动起点y坐标)<br>to_x(必选参数,滑动终点x坐标)<br>to_y(必选参数,滑动终点y坐标)<br>swipeVelocityPps_ (可选参数,滑动速度,取值范围: 200-40000, 默认值: 600, 单位: px/s) | hdc shell uitest uiInput swipe from_x from_y to_x to_y swipeVelocityPps_                         |
+| drag        | 模拟拖拽操作                              | from_x (必选参数,拖拽起点x坐标)<br>from_y(必选参数,拖拽起点y坐标)<br>to_x(必选参数,拖拽终点x坐标)<br>to_y(必选参数,拖拽终点y坐标)<br>swipeVelocityPps_ (可选参数,滑动速度,取值范围: 200-40000, 默认值: 600, 单位: px/s) | hdc shell uitest uiInput drag from_x from_y to_x to_y swipeVelocityPps_                          |
+| dircFling   | 模拟指定方向滑动操作                      | direction (可选参数,滑动方向,可选值: [0,1,2,3], 滑动方向: [左,右,上,下],默认值: 0)<br>swipeVelocityPps_ (可选参数,滑动速度,取值范围: 200-40000, 默认值: 600, 单位: px/s)<br>stepLength(可选参数,滑动步长,默认值:滑动距离/50, 单位: px) | hdc shell uitest uiInput dircFling direction swipeVelocityPps_ stepLength                        |
+| inputText   | 模拟输入框输入文本操作                    | point_x (必选参数,输入框x坐标点)<br>point_y (必选参数,输入框y坐标点)<br>input(输入文本)                                                                           | hdc shell uitest uiInput inputText point_x point_y text                                          |
+| keyEvent    | 模拟实体按键事件(如:键盘,电源键,返回上一级,返回桌面等),以及组合按键操作 | keyID (必选参数,实体按键对应ID)<br>keyID2 (可选参数,实体按键对应ID)                                                                                               | hdc shell uitest uiInput keyEvent keyID                                                         |
 
 **举例**
 ```
