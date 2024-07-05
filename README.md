@@ -62,6 +62,7 @@ HDC主要有三部分组成:
   - [录制用户操作](#录制用户操作)
 - [屏幕截图](#屏幕截图)
 - [屏幕录屏](#屏幕录屏)
+- [点亮屏幕（唤醒）](#点亮屏幕唤醒)
 - [收起键盘](#收起键盘)
 - [hidumper工具](#hidumper工具)
   - [system abilities](#system-abilities)
@@ -959,6 +960,13 @@ $ hdc shell snapshot_display -f /data/local/2.png
 
 # 屏幕录屏
 hdc命令还未支持，官方在开发中。。。
+
+# 点亮屏幕（唤醒）
+```
+$ hdc shell power-shell wakeup
+
+WakeupDevice is called
+```
 
 
 # 收起键盘
