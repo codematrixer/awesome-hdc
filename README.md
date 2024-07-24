@@ -18,7 +18,7 @@ HDC主要有三部分组成:
 - [基本用法](#基本用法)
   - [基本语法](#基本语法)
 - [设备连接管理](#设备连接管理)
-  - [查看版本](#查看版本)
+  - [查看HDC版本](#查看hdc版本)
   - [启动/停止 HDC Server](#启动停止-hdc-server)
   - [查询设备列表](#查询设备列表)
   - [查询设备UDID](#查询设备udid)
@@ -127,7 +127,7 @@ AppMod finish
 -  如果出现`hdc list targets`获取不到设备信息的情况，可以通过任务管理器查看是否有hdc进程存在。若进程存在，则通过`hdc kill -r`命令杀掉该进程。
 
 # 设备连接管理
-## 查看版本
+## 查看HDC版本
 ```
 $ hdc -v
 
@@ -959,7 +959,15 @@ $ hdc shell snapshot_display -f /data/local/tmp/2.jpeg
 方式二的截图性能效率远远高于方式一
 
 # 屏幕录屏
-hdc命令还未支持，官方在开发中。。。
+相关hdc命令还未支持，官方在开发中。。。
+
+我这边通过python脚本实现了录屏功能，使用方法如下
+```
+cd awesome-hdc/scripts
+pip3 install -r requirements.txt
+
+python3 screen_recroding.py
+```
 
 # 点亮屏幕（唤醒）
 ```
