@@ -945,14 +945,14 @@ hdc提供了两种截图命令
 $ hdc shell uitest screenCap
 // 默认存储路径：/data/local/tmp，文件名：时间戳 + .png。
 
-$ hdc shell uitest screenCap -p /data/local/1.png
+$ hdc shell uitest screenCap -p /data/local/tmp/1.png
 // 指定存储路径和文件名。
 ```
 
 
 【推荐】方式二
 ```
-$ hdc shell snapshot_display -f /data/local/2.png
+$ hdc shell snapshot_display -f /data/local/tmp/2.jpeg
 // 截图完成后可以通过 hdc file recv 命令导入到本地
 ```
 
