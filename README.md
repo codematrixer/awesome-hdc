@@ -63,6 +63,7 @@ HDC主要有三部分组成:
 - [屏幕截图](#屏幕截图)
 - [屏幕录屏](#屏幕录屏)
 - [点亮屏幕（唤醒）](#点亮屏幕唤醒)
+- [打开Scheme (URL)](#打开scheme-url)
 - [收起键盘](#收起键盘)
 - [hidumper工具](#hidumper工具)
   - [system abilities](#system-abilities)
@@ -974,6 +975,15 @@ python3 screen_recroding.py
 $ hdc shell power-shell wakeup
 
 WakeupDevice is called
+```
+
+# 打开Scheme (URL)
+```
+$ hdc shell aa start -U http://www.baidu.com
+start ability successfully.
+
+$ hdc shell aa start -U kwai://home
+
 ```
 
 
