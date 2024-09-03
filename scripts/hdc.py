@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import tempfile
 import json
 import uuid
@@ -6,6 +8,8 @@ import socket
 import subprocess
 from typing import Union, List
 from dataclasses import dataclass
+
+from keycode import KeyCode
 
 
 class _FreePort:
@@ -69,39 +73,43 @@ class HdcWrapper:
     def forward_port(self, rport: int) -> int:
         lport: int = _FreePort().get()
         result = _execute_command(f"hdc -t {self.serial} fport tcp:{lport} tcp:{rport}")
-        if result.exit_code == 0:
-            return lport
-        raise RuntimeError("HDC forward port error", result.output)
+        if result.exit_code != 0:
+            raise RuntimeError("HDC forward port error", result.output)
+        return lport
 
     def rm_forward(self, lport: int, rport: int) -> int:
         result = _execute_command(f"hdc -t {self.serial} fport rm tcp:{lport} tcp:{rport}")
-        if result.exit_code == 0:
-            return lport
-        raise RuntimeError("HDC forward port error", result.output)
+        if result.exit_code != 0:
+            raise RuntimeError("HDC forward port error", result.output)
+        return lport
 
-    def send_file(self, lpath: str, rpath: str) -> None:
+    def send_file(self, lpath: str, rpath: str):
         result = _execute_command(f"hdc -t {self.serial} file send {lpath} {rpath}")
         if result.exit_code != 0:
             raise RuntimeError("HDC send file error", result.output)
+        return result
 
-    def recv_file(self, rpath: str, lpath: str) -> None:
+    def recv_file(self, rpath: str, lpath: str):
         result = _execute_command(f"hdc -t {self.serial} file recv {rpath} {lpath}")
         if result.exit_code != 0:
             raise RuntimeError("HDC receive file error", result.output)
+        return result
 
-    def uninstall(self, bundlename: str) -> None:
+    def uninstall(self, bundlename: str):
         result = _execute_command(f"hdc -t {self.serial} uninstall {bundlename}")
         if result.exit_code != 0:
             raise RuntimeError("HDC uninstall error", result.output)
+        return result
 
-    def install(self, apkpath: str) -> None:
+    def install(self, apkpath: str):
         result = _execute_command(f"hdc -t {self.serial} install {apkpath}")
         if result.exit_code != 0:
             raise RuntimeError("HDC install error", result.output)
+        return result
 
-    def shell(self, cmd: str) -> CommandResult:
+    def shell(self, cmd: str, error_raise=True) -> CommandResult:
         result = _execute_command(f"hdc -t {self.serial} shell {cmd}")
-        if result.exit_code != 0:
+        if result.error and error_raise:
             raise RuntimeError("HDC shell error", f"{cmd}\n{result.output}\n{result.error}")
         return result
 
@@ -110,31 +118,49 @@ class HdcWrapper:
         raw = result.output.split('\n')
         return [item.strip() for item in raw]
 
-    def send_key(self, key_id: int) -> None:
+    def start_app(self, package_name: str, ability_name: str):
+        return self.shell(f"aa start -a {ability_name} -b {package_name}")
+
+    def stop_app(self, package_name: str):
+        return self.shell(f"aa force-stop {package_name}")
+
+    def wakeup(self):
+        self.shell("power-shell wakeup")
+
+    def send_key(self, key_code: Union[KeyCode, int]) -> None:
+        if isinstance(key_code, KeyCode):
+            key_code = key_code.value
+        self.shell(f"uitest uiInput keyEvent {key_code}")
+
+    def go_home(self):
+        self.send_key(KeyCode.HOME)
+
+    def back(self):
+        self.send_key(KeyCode.BACK)
+
+    def click(self, x: int, y: int):
+        self.shell(f"uitest uiInput click {x} {y}")
+
+    def doubleClick(self, x: int, y: int):
+        self.shell(f"uitest uiInput doubleClick {x} {y}")
+
+    def longClick(self, x: int, y: int):
+        self.shell(f"uitest uiInput longClick {x} {y}")
+
+    def swipe(self, x1, y1, x2, y2, speed=1000):
         """
-        keyId: 1 -> home
-        keyId: 2 -> back
-        ...
-        https://issuereporter.developer.huawei.com/detail/240306161416050/comment
-        https://www.seaxiang.com/blog/b3944403863b4baf91fd1c5f471c6126
-
+        speed为滑动速率, 范围:200~40000, 不在范围内设为默认值为600, 单位: 像素点/秒
         """
-        self.shell(f"uinput -K -d {key_id} -u {key_id}")
+        self.shell(f"uitest uiInput swipe {x1} {y1} {x2} {y2} {speed}")
 
-    def hide_keyboard(self) -> None:
-        self.shell("uinput -K -d 2 -i 2 -u 2")
+    def drag(self, x1, y1, x2, y2, speed=1000):
+        """
+        speed为滑动速率, 范围:200~40000, 不在范围内设为默认值为600, 单位: 像素点/秒
+        """
+        self.shell(f"uitest uiInput drag {x1} {y1} {x2} {y2} {speed}")
 
-    def tap(self, x: int, y: int) -> None:
-        self.shell(f"uinput -T -c {x} {y}")
-
-    def swipe(self, x1: int, y1: int, x2: int, y2: int, duration: int = 300) -> None:
-        self.shell(f"uinput -T -m {x1} {y1} {x2} {y2} {duration}")
-
-    def input_text(self, x: int, y: int, text: str) -> None:
+    def input_text(self, x: int, y: int, text: str):
         self.shell(f"uitest uiInput inputText {x} {y} {text}")
-
-    def clear_app_data(self, package_name: str) -> None:
-        self.shell(f"bm clean -n {package_name} -d")
 
     def screenshot(self, path: str) -> str:
         _uuid = uuid.uuid4().hex
