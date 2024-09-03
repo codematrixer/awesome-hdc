@@ -47,6 +47,7 @@ HDC主要有三部分组成:
   - [分辩率](#分辩率)
   - [wlanip](#wlanip)
   - [电量/温度](#电量温度)
+  - [点亮屏幕（唤醒）](#点亮屏幕唤醒)
   - [查看屏幕状态](#查看屏幕状态)
 - [端口转发](#端口转发)
   - [显示端口转发列表](#显示端口转发列表)
@@ -56,15 +57,12 @@ HDC主要有三部分组成:
 - [文件传输](#文件传输)
   - [从本地电脑发送文件至手机](#从本地电脑发送文件至手机)
   - [从手机拷贝文件至本地电脑](#从手机拷贝文件至本地电脑)
-- [uitest工具](#uitest工具)
-  - [UI模拟操作](#ui模拟操作)
-  - [获取页面布局信息（控件树）](#获取页面布局信息控件树)
-  - [录制用户操作](#录制用户操作)
+- [UI模拟操作(点击滑动等)](#ui模拟操作点击滑动等)
 - [屏幕截图](#屏幕截图)
 - [屏幕录屏](#屏幕录屏)
-- [点亮屏幕（唤醒）](#点亮屏幕唤醒)
 - [打开Scheme (URL)](#打开scheme-url)
-- [收起键盘](#收起键盘)
+- [获取页面布局信息（控件树）](#获取页面布局信息控件树)
+- [录制用户操作](#录制用户操作)
 - [hidumper工具](#hidumper工具)
   - [system abilities](#system-abilities)
 - [aa工具](#aa工具)
@@ -579,8 +577,14 @@ temperature: 280
 chargeType: 1 
 ```
 
+## 点亮屏幕（唤醒）
+```
+$ hdc shell power-shell wakeup
+
+WakeupDevice is called
+```
+
 ## 查看屏幕状态
-可以通过如下命令判断屏幕是否点亮
 ```
 $ hdc shell hidumper -s 3301 -a -a
 
@@ -753,20 +757,7 @@ FileTransfer finish, Size:71792, File count = 1, time:12ms rate:5982.67kB/s
 ```
 
 
-# uitest工具
-```
-$ hdc shell uitest help
-   help,                                            print help messages
-   screenCap,
-   dumpLayout,
-   uiRecord record,     wirte location coordinates of events into files
-   uiRecord read,                     print file content to the console
-   uiInput,
-   --version,                                print current tool version
-```
-
-
-## UI模拟操作
+# UI模拟操作(点击滑动等)
 支持操作类型：`点击` `双击` `长按` `慢滑` `快滑` `拖拽` `输入文字` `KeyEvent`
 | 配置参数名  | 配置参数含义                              | 配置参数取值                                                                                                                                                       | 示例                                                                                             |
 |-------------|-------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
@@ -829,7 +820,48 @@ hdc shell uitest uiInput keyEvent 2072 2038
 `keyEvent`映射表可以参考这个文档：https://docs.openharmony.cn/pages/v4.1/en/application-dev/reference/apis-input-kit/js-apis-keycode.md
 
 
-## 获取页面布局信息（控件树）
+# 屏幕截图
+hdc提供了两种截图命令
+
+方式一
+```
+$ hdc shell uitest screenCap
+// 默认存储路径：/data/local/tmp，文件名：时间戳 + .png。
+
+$ hdc shell uitest screenCap -p /data/local/tmp/1.png
+// 指定存储路径和文件名。
+```
+
+
+【推荐】方式二
+```
+$ hdc shell snapshot_display -f /data/local/tmp/2.jpeg
+// 截图完成后可以通过 hdc file recv 命令导入到本地
+```
+
+方式二的截图性能效率远远高于方式一
+
+# 屏幕录屏
+相关hdc命令还未支持，官方在开发中。。。
+
+我这边通过python脚本实现了录屏功能，使用方法如下
+```
+cd awesome-hdc/scripts
+pip3 install -r requirements.txt
+
+python3 screen_recroding.py
+```
+
+# 打开Scheme (URL)
+```
+$ hdc shell aa start -U http://www.baidu.com
+start ability successfully.
+
+$ hdc shell aa start -U kwai://home
+
+```
+
+# 获取页面布局信息（控件树）
 ```
 $ hdc shell uitest dumpLayout -p {saveDumpPath}   # 运行命令前需要手动打开app，进入对应页面
 
@@ -866,7 +898,7 @@ DumpLayout saved to:/data/local/tmp/layout_407568854.json
 ```
 
 
-## 录制用户操作
+# 录制用户操作
 将当前界面操作记录到`/data/local/tmp/layout/record.csv`，结束录制操作使用`Ctrl+C`结束录制
 ```
 $  hdc shell uitest uiRecord record
@@ -937,61 +969,6 @@ $ hdc file recv  /data/local/tmp/layout/record.csv ~/record.csv
   }],
   "fingerNumber": "1" //手指数量
 }
-```
-
-
-# 屏幕截图
-hdc提供了两种截图命令
-
-方式一
-```
-$ hdc shell uitest screenCap
-// 默认存储路径：/data/local/tmp，文件名：时间戳 + .png。
-
-$ hdc shell uitest screenCap -p /data/local/tmp/1.png
-// 指定存储路径和文件名。
-```
-
-
-【推荐】方式二
-```
-$ hdc shell snapshot_display -f /data/local/tmp/2.jpeg
-// 截图完成后可以通过 hdc file recv 命令导入到本地
-```
-
-方式二的截图性能效率远远高于方式一
-
-# 屏幕录屏
-相关hdc命令还未支持，官方在开发中。。。
-
-我这边通过python脚本实现了录屏功能，使用方法如下
-```
-cd awesome-hdc/scripts
-pip3 install -r requirements.txt
-
-python3 screen_recroding.py
-```
-
-# 点亮屏幕（唤醒）
-```
-$ hdc shell power-shell wakeup
-
-WakeupDevice is called
-```
-
-# 打开Scheme (URL)
-```
-$ hdc shell aa start -U http://www.baidu.com
-start ability successfully.
-
-$ hdc shell aa start -U kwai://home
-
-```
-
-
-# 收起键盘
-```
-$ hdc shell uinput -K -d 2 -i 2 -u 2
 ```
 
 # hidumper工具
