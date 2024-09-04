@@ -76,6 +76,7 @@ HDC主要有三部分组成:
   - [PowerManagerService](#powermanagerservice)
   - [BatteryService](#batteryservice)
   - [NetConnManager](#netconnmanager)
+  - [MemoryManagerService](#memorymanagerservice)
   - [StorageManager](#storagemanager)
 - [aa工具](#aa工具)
   - [start](#start)
@@ -1542,7 +1543,46 @@ Dns result Info:
 	failReports: 2
 ```
 
+## MemoryManagerService
+```
+$ hdc shell hidumper -s MemoryManagerService
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------MemoryManagerService----------------------------------
+Usage:
+-h                          |help for memmgrservice dumper
+-a                          |dump all info
+-e                          |dump event observer
+-r                          |dump reclaim info and adj
+-c                          |dump config
+-m                          |show malloc state
+-minisys                    |show mini system information for each service
+-s                          |show subscriber all the pid which can be reclaimed
+-d {pid} {uid} {state}      |trigger appstate change
+
+-t                          trigger memory onTrim:
+-t 1 ---------------------- level_purgeable
+-t 2 ---------------------- level_moderate
+-t 3 ---------------------- level_low
+-t 4 ---------------------- level_critical
+
+-f                          trigger purgeable memory Reclaim:
+-f 1 ---------------------  purg_heap all
+-f 2 ---------------------  purg_ashmem all
+-f 3 ---------------------  purg_subscriber all
+-f 4 ---------------------  purg all purgeable memory
+-f 1 -id {uid} {size} ----- purg_heap by memCG and size(KB). if input uid is 0, reclaim system_lru
+-f 2 -id {ashmId} {time} -- purg_ashmem by ashmId, which can get from /proc/purgeable_ashmem_trigger
+-f 3 -id {pid} ------------ purg_subscriber by pid. if input pid is 0, recalim subscriber all
+
+Please check your command.
+```
+
+
 ## StorageManager
+TODO
 
 
 # aa工具
