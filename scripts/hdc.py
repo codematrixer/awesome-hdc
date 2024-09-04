@@ -5,6 +5,7 @@ import json
 import uuid
 import shlex
 import socket
+import re
 import subprocess
 from typing import Union, List
 from dataclasses import dataclass
@@ -83,6 +84,16 @@ class HdcWrapper:
             raise RuntimeError("HDC forward port error", result.output)
         return lport
 
+    def list_fport(self) -> List:
+        """
+        eg. ['tcp:10001 tcp:8012', 'tcp:10255 tcp:8012']
+        """
+        result = _execute_command(f"hdc -t {self.serial} fport ls")
+        if result.exit_code != 0:
+            raise RuntimeError("HDC forward list error", result.output)
+        pattern = re.compile(r"tcp:\d+ tcp:\d+")
+        return pattern.findall(result.output)
+
     def send_file(self, lpath: str, rpath: str):
         result = _execute_command(f"hdc -t {self.serial} file send {lpath} {rpath}")
         if result.exit_code != 0:
@@ -93,6 +104,12 @@ class HdcWrapper:
         result = _execute_command(f"hdc -t {self.serial} file recv {rpath} {lpath}")
         if result.exit_code != 0:
             raise RuntimeError("HDC receive file error", result.output)
+        return result
+
+    def shell(self, cmd: str, error_raise=True) -> CommandResult:
+        result = _execute_command(f"hdc -t {self.serial} shell {cmd}")
+        if result.error and error_raise:
+            raise RuntimeError("HDC shell error", f"{cmd}\n{result.output}\n{result.error}")
         return result
 
     def uninstall(self, bundlename: str):
@@ -107,16 +124,14 @@ class HdcWrapper:
             raise RuntimeError("HDC install error", result.output)
         return result
 
-    def shell(self, cmd: str, error_raise=True) -> CommandResult:
-        result = _execute_command(f"hdc -t {self.serial} shell {cmd}")
-        if result.error and error_raise:
-            raise RuntimeError("HDC shell error", f"{cmd}\n{result.output}\n{result.error}")
-        return result
-
     def list_apps(self) -> List[str]:
         result = self.shell("bm dump -a")
         raw = result.output.split('\n')
         return [item.strip() for item in raw]
+
+    def has_app(self, package_name: str) -> bool:
+        data = self.shell(f"bm dump -a | grep {package_name}").output
+        return True if data else False
 
     def start_app(self, package_name: str, ability_name: str):
         return self.shell(f"aa start -a {ability_name} -b {package_name}")
@@ -126,6 +141,48 @@ class HdcWrapper:
 
     def wakeup(self):
         self.shell("power-shell wakeup")
+
+    def screen_state(self) -> str:
+        """
+        ["INACTIVE", "SLEEP, AWAKE"]
+        """
+        data = self.shell("hidumper -s PowerManagerService -a -s").output
+        pattern = r"Current State:\s*(\w+)"
+        match = re.search(pattern, data)
+
+        return match.group(1) if match else None
+
+    def wlan_ip(self) -> Union[str, None]:
+        data = self.shell("ifconfig").output
+        matches = re.findall(r'inet addr:(?!127)(\d+\.\d+\.\d+\.\d+)', data)
+        return matches[0] if matches else None
+
+    def __split_text(self, text: str) -> str:
+        return text.split("\n")[0].strip() if text else None
+
+    def sdk_version(self) -> str:
+        data = self.shell("param get const.ohos.apiversion").output
+        return self.__split_text(data)
+
+    def sys_version(self) -> str:
+        data = self.shell("param get const.product.software.version").output
+        return self.__split_text(data)
+
+    def model(self) -> str:
+        data = self.shell("param get const.product.model").output
+        return self.__split_text(data)
+
+    def brand(self) -> str:
+        data = self.shell("param get const.product.brand").output
+        return self.__split_text(data)
+
+    def product_name(self) -> str:
+        data = self.shell("param get const.product.name").output
+        return self.__split_text(data)
+
+    def cpu_abi(self) -> str:
+        data = self.shell("param get const.product.cpu.abilist").output
+        return self.__split_text(data)
 
     def send_key(self, key_code: Union[KeyCode, int]) -> None:
         if isinstance(key_code, KeyCode):
@@ -186,3 +243,17 @@ class HdcWrapper:
                 data = {}
 
             return data
+
+
+if __name__ == "__main__":
+    hdc = HdcWrapper("FMR0223C13000649")
+    print(hdc.screen_state())
+    print(hdc.wlan_ip())
+    print(hdc.sdk_version())
+    print(hdc.sys_version())
+    print(hdc.model())
+    print(hdc.brand())
+    print(hdc.product_name())
+    print(hdc.cpu_abi())
+    print(hdc.list_apps())
+    print(hdc.has_app("com.samples.test.uitest"))
