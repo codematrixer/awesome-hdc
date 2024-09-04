@@ -23,6 +23,21 @@ HDC主要有三部分组成:
   - [查询设备列表](#查询设备列表)
   - [查询设备UDID](#查询设备udid)
   - [重启手机](#重启手机)
+- [查看设备信息](#查看设备信息)
+  - [名称](#名称)
+  - [Brand](#brand)
+  - [Model](#model)
+  - [系统版本](#系统版本)
+  - [OS版本](#os版本)
+  - [CPU架构](#cpu架构)
+  - [分辩率](#分辩率)
+  - [wlan IP](#wlan-ip)
+  - [电量/温度](#电量温度)
+  - [查看屏幕信息](#查看屏幕信息)
+  - [查看屏幕旋转状态](#查看屏幕旋转状态)
+  - [查看屏幕亮屏状态](#查看屏幕亮屏状态)
+  - [点亮屏幕（唤醒）](#点亮屏幕唤醒)
+  - [查看网络状态](#查看网络状态)
 - [应用管理](#应用管理)
   - [安装应用](#安装应用)
   - [卸载应用](#卸载应用)
@@ -37,18 +52,6 @@ HDC主要有三部分组成:
     - [清除应用缓存](#清除应用缓存)
     - [清除应用数据](#清除应用数据-1)
   - [显示可调试应用列表](#显示可调试应用列表)
-- [查看设备信息](#查看设备信息)
-  - [名称](#名称)
-  - [Brand](#brand)
-  - [Model](#model)
-  - [系统版本](#系统版本)
-  - [OS版本](#os版本)
-  - [CPU架构](#cpu架构)
-  - [分辩率](#分辩率)
-  - [wlanip](#wlanip)
-  - [电量/温度](#电量温度)
-  - [点亮屏幕（唤醒）](#点亮屏幕唤醒)
-  - [查看屏幕状态](#查看屏幕状态)
 - [端口转发](#端口转发)
   - [显示端口转发列表](#显示端口转发列表)
   - [本地端口转发到手机](#本地端口转发到手机)
@@ -63,8 +66,17 @@ HDC主要有三部分组成:
 - [打开Scheme (URL)](#打开scheme-url)
 - [获取页面布局信息（控件树）](#获取页面布局信息控件树)
 - [录制用户操作](#录制用户操作)
+- [系统日志（log）](#系统日志log)
+- [导出日志](#导出日志)
+- [导出crash日志](#导出crash日志)
 - [hidumper工具](#hidumper工具)
-  - [system abilities](#system-abilities)
+  - [list system abilities](#list-system-abilities)
+  - [RenderService](#renderservice)
+  - [DisplayManagerService](#displaymanagerservice)
+  - [PowerManagerService](#powermanagerservice)
+  - [BatteryService](#batteryservice)
+  - [NetConnManager](#netconnmanager)
+  - [StorageManager](#storagemanager)
 - [aa工具](#aa工具)
   - [start](#start)
   - [stop-service](#stop-service)
@@ -82,7 +94,6 @@ HDC主要有三部分组成:
   - [disable](#disable)
   - [get](#get)
 - [param工具](#param工具)
-- [设备日志](#设备日志)
 - [Instrument Test](#instrument-test)
 - [性能工具](#性能工具)
 - [参考链接](#参考链接)
@@ -182,6 +193,328 @@ C46284C052AE01BBD2358FE44B279524B508FC959AAB5F4B0B74E42A06569B7E
 $ hdc target boot
 
 ```
+
+
+# 查看设备信息
+
+## 名称
+```
+$ hdc shell param get const.product.name               
+
+HUAWEI Mate 60 Pro
+```
+## Brand
+```
+$ hdc shell param get const.product.brand
+
+HUAWEI 
+```
+## Model
+```
+$ hdc shell param get const.product.model
+
+ALN-AL00 
+```
+## 系统版本
+```
+$ hdc shell param get const.product.software.version                                      
+
+ALN-AL00 5.0.0.22(SP35DEVC00E22R4P1log) 
+```
+
+## OS版本
+```
+$ hdc shell param get const.ohos.apiversion  
+
+12 
+```
+
+## CPU架构
+```
+$ hdc  shell param get const.product.cpu.abilist  
+
+arm64-v8a 
+```
+## 分辩率
+```
+$ hdc shell hidumper -s RenderService -a screen
+
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------RenderService---------------------------------
+-- ScreenInfo
+screen[0]: id=0, powerstatus=POWER_STATUS_OFF, backlight=51, screenType=EXTERNAL_TYPE, render size: 1260x2720, physical screen resolution: 1260x2720, isvirtual=false, skipFrameInterval_:1
+
+  supportedMode[0]: 1260x2720, refreshrate=120
+  supportedMode[1]: 1260x2720, refreshrate=90
+  supportedMode[2]: 1260x2720, refreshrate=60
+  supportedMode[3]: 1260x2720, refreshrate=30
+  activeMode: 1260x2720, refreshrate=60
+  capability: name=, phywidth=72, phyheight=156,supportlayers=12, virtualDispCount=0, propCount=0, type=DISP_INTF_HDMI, supportWriteBack=false
+```
+
+执行上述命令后，解析返回内容，可以通过正则表达式提取`1260x2720`
+
+## wlan IP
+```
+$ hdc shell ifconfig
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:99055 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:99055 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:5889697 TX bytes:5889697
+
+wlan0     Link encap:Ethernet  HWaddr ea:f9:7d:21:52:31
+          inet addr:172.31.125.111  Bcast:172.31.125.255  Mask:255.255.254.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:1232924 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:2061202 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:877179224 TX bytes:2570352818
+
+p2p0      Link encap:Ethernet  HWaddr d2:0d:f7:cc:12:fb
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 TX bytes:0
+
+chba0     Link encap:Ethernet  HWaddr ec:11:05:fb:18:66
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 TX bytes:0
+```
+
+注意：这个命令在Beta3版本之前，会提示`Cannot open netlink socket: Permission denied`，需要升级系统。
+
+## 电量/温度
+
+```
+$ hdc shell hidumper -s BatteryService -a -i                
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------BatteryService---------------------------------
+Current time: 2024-05-30 12:08:37.419
+capacity: 100 
+batteryLevel: 1 
+chargingStatus: 3 
+healthState: 1 
+pluggedType: 1 
+voltage: 4496732 
+present: 1 
+technology: Li-poly 
+nowCurrent: 123 
+currentAverage: 83 
+totalEnergy: 5203 
+remainingEnergy: 5207 
+remainingChargeTime: 0 
+temperature: 280 
+chargeType: 1 
+```
+
+## 查看屏幕信息
+```
+$ hdc shell hidumper -s DisplayManagerService -a -a
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------DisplayManagerService----------------------------------
+-------------- DMS Multi User Info --------------
+[oldScbPid:]
+[userId:] 100
+[ScbPid:] 4438
+---------------- Screen ID: 0 ----------------
+FoldStatus:                   UNKNOWN
+[SCREEN SESSION]
+Name:                         UNKNOWN
+RSScreenId:                   0
+activeModes<id, W, H, RS>:    0, 1260, 2720, 120
+SourceMode:                   0
+ScreenCombination:            0
+Orientation:                  0
+Rotation:                     0
+ScreenRequestedOrientation:   0
+[RS INFO]
+SupportedColorGamuts:         0, 4, 6
+ScreenColorGamut:             4
+GraphicPixelFormat:           0
+SupportedScreenHDRFormat:     2, 1, 3
+ScreenHDRFormat:              2
+SupportedColorSpaces:         0, 2294273, 2294278
+ScreenColorSpace:             2294273
+[CUTOUT INFO]
+WaterFall_L<X,Y,W,H>:         0, 0, 0, 0
+WaterFall_T<X,Y,W,H>:         0, 0, 0, 0
+WaterFall_R<X,Y,W,H>:         0, 0, 0, 0
+WaterFall_B<X,Y,W,H>:         0, 0, 0, 0
+BoundingRects<X,Y,W,H>:       [494, 36, 273, 72]
+[SCREEN INFO]
+VirtualWidth:                 387
+VirtualHeight:                836
+LastParentId:                 18446744073709551615
+ParentId:                     1
+IsScreenGroup:                0
+VirtualPixelRatio:            3.25
+Rotation:                     0
+Orientation:                  0
+SourceMode:                   0
+ScreenType:                   1
+[SCREEN PROPERTY]
+Rotation:                     0
+Density:                      3.25
+DensityInCurResolution:       3.25
+PhyWidth:                     72
+PhyHeight:                    156
+RefreshRate:                  60
+VirtualPixelRatio:            3.25
+ScreenRotation:               0
+Orientation:                  0
+DisplayOrientation:           0
+GetScreenType:                1
+ReqOrientation:               0
+DPI<X, Y>:                    444.5, 442.871
+Offset<X, Y>:                 0, 0
+Bounds<L,T,W,H>:              0, 0, 1260, 2720,
+PhyBounds<L,T,W,H>:           0, 0, 1260, 2720,
+AvailableArea<X,Y,W,H>        0, 0, 1260, 2720,
+DefaultDeviceRotationOffset   0
+```
+
+执行上述命令后，解析返回内容，通过正则提取需要的信息，比如屏幕尺寸分辨率Bounds，VirtualWidth，VirtualHeight，PhyWidth，PhyHeight，ScreenRotation
+
+## 查看屏幕旋转状态
+
+```
+$ hdc shell hidumper -s DisplayManagerService -a -a
+```
+通过上面的查看屏幕信息命令，通过正则提取ScreenRotation字段即可，ScreenRotation有四个值：
+- 0：未旋转
+- 90：顺时针旋转90度
+- 180：顺时针旋转180度
+- 270：顺时针旋转270度
+
+备注：目前旋转状态只能查看，不支持设置
+
+## 查看屏幕亮屏状态
+```
+$ hdc shell hidumper -s PowerManagerService -a -s
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------PowerManagerService----------------------------------
+POWER STATE DUMP:
+Current State: AWAKE  Reason: 20  Time: 521085695
+ScreenOffTime: Timeout=600000ms
+DUMP DETAILS:
+Last Screen On: 521248337
+Last Screen Off: 467804783
+Last SuspendDevice: 0
+Last WakeupDevice: 464729447
+Last Refresh: 521248337
+DUMP EACH STATES:
+State: AWAKE   Reason: POWER_KEY   Time: 521085695
+   Failure: INIT   Reason:    From: AWAKE   Time: 0
+
+State: FREEZE   Reason: INIT   Time: 0
+   Failure: INIT   Reason:    From: AWAKE   Time: 0
+
+State: INACTIVE   Reason: TIMEOUT   Time: 467805109
+   Failure: INIT   Reason:    From: AWAKE   Time: 0
+
+State: STAND_BY   Reason: INIT   Time: 0
+   Failure: INIT   Reason:    From: AWAKE   Time: 0
+
+State: DOZE   Reason: INIT   Time: 0
+   Failure: INIT   Reason:    From: AWAKE   Time: 0
+
+State: SLEEP   Reason: TIMEOUT   Time: 467810120
+   Failure: INIT   Reason:    From: AWAKE   Time: 0
+
+State: HIBERNATE   Reason: INIT   Time: 0
+   Failure: INIT   Reason:    From: AWAKE   Time: 0
+
+State: SHUTDOWN   Reason: INIT   Time: 0
+   Failure: INIT   Reason:    From: AWAKE   Time: 0
+
+State: DIM   Reason: TIMEOUT   Time: 467797280
+   Failure: TIMEOUT   Reason: Blocked by running lock   From: AWAKE   Time: 447180354
+```
+屏幕状态有这几种：
+- INACTIVE
+- SLEEP
+- AWAKE
+
+
+## 点亮屏幕（唤醒）
+```
+$ hdc shell power-shell wakeup
+
+WakeupDevice is called
+```
+
+## 查看网络状态
+
+**联网状态**
+```
+$ hdc shell hidumper -s NetConnManager
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------NetConnManager----------------------------------
+Net connect Info:
+	defaultNetSupplier_ is nullptr
+	SupplierId:
+	NetId: 0
+	ConnStat: 0
+	IsAvailable:
+	IsRoaming: 0
+	Strength: 0
+	Frequency: 0
+	LinkUpBandwidthKbps: 0
+	LinkDownBandwidthKbps: 0
+	Uid: 0
+Dns result Info:
+	netId: 0
+	totalReports: 2
+	failReports: 2
+```
+
+**wifi信息**
+```
+$ hdc shell hidumper -s WifiDevice
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------WifiDevice----------------------------------
+WiFi active state: activated
+
+WiFi connection status: connected
+  Connection.ssid: K-Lab
+  Connection.bssid: cc:d0:**:**:**:e2
+  Connection.rssi: -45
+  Connection.band: 2.4GHz
+  Connection.frequency: 2462
+  Connection.linkSpeed: 156
+  Connection.macAddress: ea:f9:**:**:**:31
+  Connection.isHiddenSSID: false
+  Connection.signalLevel: 4
+
+Country Code: CN
+```
+
 
 # 应用管理
 ## 安装应用
@@ -478,194 +811,6 @@ $ hdc track-jpid
 ```
 - `jpid`显示可调试应用列表
 - `track-jpid`动态显示可调试应用列表。
-
-
-# 查看设备信息
-
-## 名称
-```
-$ hdc shell param get const.product.name               
-
-HUAWEI Mate 60 Pro
-```
-## Brand
-```
-$ hdc shell param get const.product.brand
-
-HUAWEI 
-```
-## Model
-```
-$ hdc shell param get const.product.model
-
-ALN-AL00 
-```
-## 系统版本
-```
-$ hdc shell param get const.product.software.version                                      
-
-ALN-AL00 5.0.0.22(SP35DEVC00E22R4P1log) 
-```
-
-## OS版本
-```
-$ hdc shell param get const.ohos.apiversion  
-
-12 
-```
-
-## CPU架构
-```
-$ hdc  shell param get const.product.cpu.abilist  
-
-arm64-v8a 
-```
-## 分辩率
-```
-$ hdc shell hidumper -s RenderService -a screen
-
-
--------------------------------[ability]-------------------------------
-
-
-----------------------------------RenderService---------------------------------
--- ScreenInfo
-screen[0]: id=0, powerstatus=POWER_STATUS_OFF, backlight=51, screenType=EXTERNAL_TYPE, render size: 1260x2720, physical screen resolution: 1260x2720, isvirtual=false, skipFrameInterval_:1
-
-  supportedMode[0]: 1260x2720, refreshrate=120
-  supportedMode[1]: 1260x2720, refreshrate=90
-  supportedMode[2]: 1260x2720, refreshrate=60
-  supportedMode[3]: 1260x2720, refreshrate=30
-  activeMode: 1260x2720, refreshrate=60
-  capability: name=, phywidth=72, phyheight=156,supportlayers=12, virtualDispCount=0, propCount=0, type=DISP_INTF_HDMI, supportWriteBack=false
-```
-
-执行上述命令后，解析返回内容，可以通过正则表达式提取`1260x2720`
-
-## wlanip
-```
-$ hdc shell ip address show
-```
-
-后来发现这个命令再最新的系统上实现，提示`Cannot open netlink socket: Permission denied`, 正在联系鸿蒙方，等待更新。
-先记个TODO吧。
-
-## 电量/温度
-
-```
-$ hdc shell hidumper -s BatteryService -a -i                
-
--------------------------------[ability]-------------------------------
-
-
-----------------------------------BatteryService---------------------------------
-Current time: 2024-05-30 12:08:37.419
-capacity: 100 
-batteryLevel: 1 
-chargingStatus: 3 
-healthState: 1 
-pluggedType: 1 
-voltage: 4496732 
-present: 1 
-technology: Li-poly 
-nowCurrent: 123 
-currentAverage: 83 
-totalEnergy: 5203 
-remainingEnergy: 5207 
-remainingChargeTime: 0 
-temperature: 280 
-chargeType: 1 
-```
-
-## 点亮屏幕（唤醒）
-```
-$ hdc shell power-shell wakeup
-
-WakeupDevice is called
-```
-
-## 查看屏幕状态
-```
-$ hdc shell hidumper -s 3301 -a -a
-
--------------------------------[ability]-------------------------------
-
-
-----------------------------------PowerManagerService---------------------------------
-POWER STATE DUMP:
-Current State: AWAKE  Reason: 20  Time: 107537120
-ScreenOffTime: Timeout=600000ms
-DUMP DETAILS:
-Last Screen On: 107573125
-Last Screen Off: 103825347
-Last SuspendDevice: 0
-Last WakeupDevice: 100917510
-Last Refresh: 107573125
-DUMP EACH STATES:
-State: AWAKE   Reason: POWER_KEY   Time: 107537120
-   Failure: APPLICATION   Reason: Already in the state   From: AWAKE   Time: 97916146
-
-State: FREEZE   Reason: INIT   Time: 0
-   Failure: INIT   Reason:    From: AWAKE   Time: 0
-
-State: INACTIVE   Reason: TIMEOUT   Time: 103825357
-   Failure: INIT   Reason:    From: AWAKE   Time: 0
-
-State: STAND_BY   Reason: UNKNOWN   Time: 0
-   Failure: UNKNOWN   Reason:    From: UNKNOWN   Time: 0
-
-State: DOZE   Reason: INIT   Time: 0
-   Failure: INIT   Reason:    From: AWAKE   Time: 0
-
-State: SLEEP   Reason: TIMEOUT   Time: 103830359
-   Failure: INIT   Reason:    From: AWAKE   Time: 0
-
-State: HIBERNATE   Reason: INIT   Time: 0
-   Failure: INIT   Reason:    From: AWAKE   Time: 0
-
-State: SHUTDOWN   Reason: INIT   Time: 0
-   Failure: INIT   Reason:    From: AWAKE   Time: 0
-
-State: DIM   Reason: INIT   Time: 0
-   Failure: TIMEOUT   Reason: Forbid transit   From: SLEEP   Time: 98317861
-
-RUNNING LOCK DUMP:
-  totalSize=15 validSize=0
-Summary By Type: 
-  SCREEN: 0
-  BACKGROUND: 0
-  PROXIMITY_SCREEN_CONTROL: 0
-  RUNNINGLOCK_COORDINATION: 0
-Dump Lock List: 
-  index=1 time=107569814 type=BACKGROUND_TASK name=PowerMgrWakeupLock uid=5555 pid=601 state=0
-  index=2 time=107569710 type=BACKGROUND_PHONE name=telRilAckRunningLock uid=1001 pid=966 state=0
-  index=3 time=107569709 type=BACKGROUND_PHONE name=telRilRequestRunningLock uid=1001 pid=966 state=0
-  index=4 time=107569669 type=BACKGROUND name=handleAckRunningLock uid=1001 pid=966 state=0
-  index=5 time=107569669 type=BACKGROUND name=handleRequestRunningLock uid=1001 pid=966 state=0
-  index=6 time=107569657 type=BACKGROUND name=telRilExtRequestRunningLock uid=1001 pid=966 state=0
-  index=7 time=107569657 type=BACKGROUND name=telRilExtAckRunningLock uid=1001 pid=966 state=0
-  index=8 time=107566014 type=SCREEN name=KeepScreenOn uid=20020108 pid=2666 state=0
-  index=9 time=107415510 type=BACKGROUND_AUDIO name=AudioOffloadBackgroudPlay uid=1041 pid=839 state=0
-  index=10 time=107569355 type=BACKGROUND_AUDIO name=AudioPrimaryBackgroundPlay uid=1041 pid=839 state=0
-  index=11 time=107569347 type=BACKGROUND_AUDIO name=AudioPrimaryBackgroundPlay uid=1041 pid=839 state=0
-  index=12 time=107569060 type=BACKGROUND name=StandbyRunningLock uid=0 pid=852 state=0
-  index=13 time=107549168 type=BACKGROUND_NOTIFICATION name=timeServiceRunningLock uid=3819 pid=1073 state=0
-  index=14 time=107568182 type=BACKGROUND name=BoosterNetAckRunningLock uid=1099 pid=958 state=0
-  index=15 time=107568182 type=BACKGROUND name=BoosterNetRequestRunningLock uid=1099 pid=958 state=0
-Dump Proxy List: 
-  index=1 pid_uid=1073_3819 lock_cnt=1 proxy_cnt=0
-  index=2 pid_uid=2638_20001 lock_cnt=0 proxy_cnt=1
-  index=3 pid_uid=2666_20020108 lock_cnt=1 proxy_cnt=0
-  index=4 pid_uid=2691_20012 lock_cnt=0 proxy_cnt=1
-  index=5 pid_uid=3310_20020040 lock_cnt=0 proxy_cnt=1
-  index=6 pid_uid=601_5555 lock_cnt=1 proxy_cnt=0
-  index=7 pid_uid=839_1041 lock_cnt=3 proxy_cnt=0
-  index=8 pid_uid=852_0 lock_cnt=1 proxy_cnt=0
-  index=9 pid_uid=958_1099 lock_cnt=2 proxy_cnt=0
-  index=10 pid_uid=966_1001 lock_cnt=6 proxy_cnt=0
-Peripherals Info: 
-  Proximity: Enabled=0 Status=0
-```
 
 
 # 端口转发
@@ -971,245 +1116,7 @@ $ hdc file recv  /data/local/tmp/layout/record.csv ~/record.csv
 }
 ```
 
-# hidumper工具
-```
-$ hdc shell hidumper -h
-
-usage:
-  -h                          |help text for the tool
-  -lc                         |a list of system information clusters
-  -ls                         |a list of system abilities
-  -c                          |all system information clusters
-  -c [base system]            |system information clusters labeled "base" and "system"
-  -s                          |all system abilities
-  -s [SA0 SA1]                |system abilities labeled "SA0" and "SA1"
-  -s [SA] -a ['-h']           |system ability labeled "SA" with arguments "-h" specified
-  -e                          |faultlogs of crash history
-  --net [pid]                 |dump network information; if pid is specified, dump traffic usage of specified pid
-  --storage [pid]             |dump storage information; if pid is specified, dump /proc/pid/io
-  -p                          |processes information, include list and information of processes and threads
-  -p [pid]                    |dump threads under pid, includes smap, block channel, execute time, mountinfo
-  --cpuusage [pid]            |dump cpu usage by processes and category; if PID is specified, dump category usage of specified pid
-  --cpufreq                   |dump real CPU frequency of each core
-  --mem [pid]                 |dump memory usage of total; dump memory usage of specified pid if pid was specified
-  --zip                       |compress output to /data/log/hidumper
-  --mem-smaps pid [-v]        |display statistic in /proc/pid/smaps, use -v specify more details
-  --mem-jsheap pid [-T tid] [--gc]  |triggerGC and dumpHeapSnapshot under pid and tid
-```
-
-## system abilities
-```
-$ hdc shell hidumper -ls
-
-System ability list:
-SystemAbilityManager             RenderService                    AbilityManagerService            
-DataObserverMgr                  UriPermissionMgr                 AccountMgr                       
-BundleMgr                        FormMgr                          ApplicationManagerService        
-AccessibilityManagerService      UserIdmService                   UserAuthService                  
-AuthExecutorMgrService           PinAuthService                   FaceAuthService                  
-FingerprintAuthService           WifiDevice                       WifiHotspot                      
-WifiP2p                          WifiScan                         1125                             
-1126                             NetConnManager                   NetPolicyManager                 
-NetStatsManager                  NetTetheringManager              VPNManager                       
-EthernetManager                  NetsysNative                     NetsysExtService                 
-DistributedNet                   1181                             HiviewService                    
-HiviewFaultLogger                HiviewSysEventService            1204                             
-XperfTraceService                HiDumperService                  XpowerManager                    
-HiDumperCpuService               DistributedKvData                ContinuationManagerService       
-ResourceSched                    BackgroundTaskManager            WorkSchedule                     
-ComponentSchedServer             SocPerfService                   DeviceUsageStatistics            
-MemoryManagerService             SuspendManager                   AbnormalEfficiencyManager        
-ConcurrentTaskService            ResourceQuotaControl             DeviceStandbyService             
-TaskHeartbeatMgrService          2901                             DeviceStatusService              
-2903                             2904                             2908                             
-AudioDistributed                 PlayerDistributedService         CameraService                    
-AudioPolicyService               AVSessionService                 AVCodecService                   
-MediaKeySystemService            MultimodalInput                  DistributedNotificationService   
-CommonEventService               PowerManagerService              BatteryService                   
-ThermalService                   BatteryStatisticsService         DisplayPowerManagerService       
-AccessTokenManagerService        PrivacyManagerService            KeystoreService                  
-DeviceThreatDetectionService     RiskAnalysisManagerService       DataCollectManagerService        
-DlpCreService                    SensorService                    MiscDeviceService                
-PasteboardService                TimeService                      InputMethodService               
-ScreenlockService                WallpaperManagerService          ParamWatcher                     
-TelephonyCallManager             TelephonyCellularCall            TelephonyCellularData            
-TelephonySmsMms                  TelephonyStateRegistry           TelephonyCoreService             
-4011                             TelephonyIms                     ModuleUpdateService              
-UsbService                       WindowManagerService             DisplayManagerService            
-DSoftbus                         DeviceAuthService                DeviceManagerService             
-StorageDaemon                    StorageManager                   HdfDeviceServiceManager          
-CloudFileDaemonService           EcologicalRuleManager            UiService                        
-UiAppearanceService              CaDaemon                         AssetService                     
-9527                             65537                            65570                            
-65728                            65777                            65830                            
-65850                            65888                            65904                            
-65926                            65958                            65962                            
-66070                            66090                            70633  
-```
-
-获取到abilities后，就可以指定service获取相关的信息。 比如通过RenderService获取一些信息
-```
-$ hdc shell hidumper -s RenderService             
-
--------------------------------[ability]-------------------------------
-
-
-----------------------------------RenderService---------------------------------
-------Graphic2D--RenderSerice ------
-Usage:
- h                             |help text for the tool
-screen                         |dump all screen infomation in the system
-surface                        |dump all surface information
-composer fps                   |dump the fps info of composer
-[surface name] fps             |dump the fps info of surface
-composer fpsClear              |clear the fps info of composer
-[windowname] fps               |dump the fps info of window
-[windowname] hitchs            |dump the hitchs info of window
-[surface name] fpsClear        |clear the fps info of surface
-nodeNotOnTree                  |dump nodeNotOnTree info
-allSurfacesMem                 |dump surface mem info
-RSTree                         |dump RSTree info
-EventParamList                 |dump EventParamList info
-allInfo                        |dump all info
-dumpMem                        |dump Cache
-trimMem cpu/gpu/shader         |release Cache
-surfacenode [id]               |dump node info
-fpsCount                       |dump the refresh rate counts info
-clearFpsCount                  |clear the refresh rate counts info
-```
-
-**获取分辩率**
-```
-$ hdc shell hidumper -s RenderService -a screen 
-
--------------------------------[ability]-------------------------------
-
-
-----------------------------------RenderService---------------------------------
--- ScreenInfo
-screen[0]: id=0, powerstatus=POWER_STATUS_OFF, backlight=21, screenType=EXTERNAL_TYPE, render size: 1260x2720, physical screen resolution: 1260x2720, isvirtual=false, skipFrameInterval_:1
-
-  supportedMode[0]: 1260x2720, refreshrate=120
-  supportedMode[1]: 1260x2720, refreshrate=90
-  supportedMode[2]: 1260x2720, refreshrate=60
-  supportedMode[3]: 1260x2720, refreshrate=30
-  activeMode: 1260x2720, refreshrate=60
-  capability: name=, phywidth=72, phyheight=156,supportlayers=12, virtualDispCount=0, propCount=0, type=DISP_INTF_HDMI, supportWriteBack=false
-```
-
-
-**获取帧率**
-首先执行如下命令进入到shell环境
-```
-$ hdc shell
-```
-然后执行`hidumper [surface name] fps` , 例如`composer fps`
-
-```
-$ hidumper -s RenderService -a "composer fps"
-
--------------------------------[ability]-------------------------------
-
-
-----------------------------------RenderService---------------------------------
-
--- The recently fps records info of screens:
-
-The fps of screen [Id:0] is:
-107537646652857
-107537663200253
-107537679747128
-107537696352336
-107537712846086
-107537729390357
-107537745974211
-107537762468482
-107537779015357
-107537795561190
-107537812110148
-107537828651815
-107537845349732
-...
-```
-
-
-
-# aa工具
-Ability assistant（Ability助手，简称为aa），是实现应用及测试用例启动功能的工具，为开发者提供基本的应用调试和测试能力，例如启动应用组件、强制停止进程、打印应用组件相关信息等。
-
-
-```
-$ hdc shell aa help
-usage: aa <command> <options>
-These are common aa commands list:
-  help                        list available commands
-  start                       start ability with options
-  stop-service                stop service with options
-  dump                        dump the ability info
-  force-stop <bundle-name>    force stop the process with bundle name
-  attach                      attach application to enter debug mdoe
-  detach                      detach application to exit debug mode
-  test                        start the test framework with options
-  appdebug                    set / cancel / get waiting debug status
-```
-
-## start
-## stop-service
-## force-stop
-## test
-## attach
-## detach
-## appdebug
-详细介绍请参考文档：https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/tools/aa-tool.md
-
-# bm工具
-Bundle Manager（包管理工具，简称bm）是实现应用安装、卸载、更新、查询等功能的工具，bm为开发者提供基本的应用安装包的调试能力，例如：安装应用，卸载应用，查询安装包信息等。
-```
-$ hdc shell bm help
-usage: bm <command> <options>
-These are common bm commands list:
-  help         list available commands
-  install      install a bundle with options
-  uninstall    uninstall a bundle with options
-  dump         dump the bundle info
-  get          obtain device udid
-  quickfix     quick fix, including query and install
-  compile      Compile the software package
-  dump-overlay dump overlay info of the specific overlay bundle
-  dump-target-overlay dump overlay info of the specific target bundle
-  dump-dependencies dump dependencies by given bundle name and module name
-  dump-shared dump inter-application shared library information by bundle name
-  clean        clean the bundle data
-```
-
-## install
-## uninstall
-## dump
-## clean
-## enable
-## disable
-## get
-
-详细介绍请参考文档：https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/tools/bm-tool.md
-
-# param工具
-param是为开发人员提供用于操作系统参数的工具，该工具只支持标准系统。
-```
-$ hdc shell param                                   
-Command list:
-    param ls [-r] [name]                            --display system parameter
-    param get [name]                                --get system parameter
-    param set name value                            --set system parameter
-    param wait name [value] [timeout]               --wait system parameter
-    param dump [verbose]                            --dump system parameter
-    param shell [-p] [name] [-u] [username] [-g] [groupname]    --shell system parameter
-    param save    
-```
-
-详细介绍请参考文档：https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/tools/param-tool.md
-
-
-# 设备日志
+# 系统日志（log）
 ```
 $ hdc hilog -h
 
@@ -1370,6 +1277,348 @@ Dictionary description:
   Rescan the elf file in the system to generate a full data dictionary file
 
 ```
+
+# 导出日志
+```
+$ hdc file recv data/log/hilog/ ./
+
+```
+# 导出crash日志
+```
+hdc file recv data/log/faultlog/faultlogger/ ./
+
+```
+
+# hidumper工具
+```
+$ hdc shell hidumper -h
+
+usage:
+  -h                          |help text for the tool
+  -lc                         |a list of system information clusters
+  -ls                         |a list of system abilities
+  -c                          |all system information clusters
+  -c [base system]            |system information clusters labeled "base" and "system"
+  -s                          |all system abilities
+  -s [SA0 SA1]                |system abilities labeled "SA0" and "SA1"
+  -s [SA] -a ['-h']           |system ability labeled "SA" with arguments "-h" specified
+  -e                          |faultlogs of crash history
+  --net [pid]                 |dump network information; if pid is specified, dump traffic usage of specified pid
+  --storage [pid]             |dump storage information; if pid is specified, dump /proc/pid/io
+  -p                          |processes information, include list and information of processes and threads
+  -p [pid]                    |dump threads under pid, includes smap, block channel, execute time, mountinfo
+  --cpuusage [pid]            |dump cpu usage by processes and category; if PID is specified, dump category usage of specified pid
+  --cpufreq                   |dump real CPU frequency of each core
+  --mem [pid]                 |dump memory usage of total; dump memory usage of specified pid if pid was specified
+  --zip                       |compress output to /data/log/hidumper
+  --mem-smaps pid [-v]        |display statistic in /proc/pid/smaps, use -v specify more details
+  --mem-jsheap pid [-T tid] [--gc]  |triggerGC and dumpHeapSnapshot under pid and tid
+```
+
+## list system abilities
+```
+$ hdc shell hidumper -ls
+
+System ability list:
+SystemAbilityManager             RenderService                    AbilityManagerService            
+DataObserverMgr                  UriPermissionMgr                 AccountMgr                       
+BundleMgr                        FormMgr                          ApplicationManagerService        
+AccessibilityManagerService      UserIdmService                   UserAuthService                  
+AuthExecutorMgrService           PinAuthService                   FaceAuthService                  
+FingerprintAuthService           WifiDevice                       WifiHotspot                      
+WifiP2p                          WifiScan                         1125                             
+1126                             NetConnManager                   NetPolicyManager                 
+NetStatsManager                  NetTetheringManager              VPNManager                       
+EthernetManager                  NetsysNative                     NetsysExtService                 
+DistributedNet                   1181                             HiviewService                    
+HiviewFaultLogger                HiviewSysEventService            1204                             
+XperfTraceService                HiDumperService                  XpowerManager                    
+HiDumperCpuService               DistributedKvData                ContinuationManagerService       
+ResourceSched                    BackgroundTaskManager            WorkSchedule                     
+ComponentSchedServer             SocPerfService                   DeviceUsageStatistics            
+MemoryManagerService             SuspendManager                   AbnormalEfficiencyManager        
+ConcurrentTaskService            ResourceQuotaControl             DeviceStandbyService             
+TaskHeartbeatMgrService          2901                             DeviceStatusService              
+2903                             2904                             2908                             
+AudioDistributed                 PlayerDistributedService         CameraService                    
+AudioPolicyService               AVSessionService                 AVCodecService                   
+MediaKeySystemService            MultimodalInput                  DistributedNotificationService   
+CommonEventService               PowerManagerService              BatteryService                   
+ThermalService                   BatteryStatisticsService         DisplayPowerManagerService       
+AccessTokenManagerService        PrivacyManagerService            KeystoreService                  
+DeviceThreatDetectionService     RiskAnalysisManagerService       DataCollectManagerService        
+DlpCreService                    SensorService                    MiscDeviceService                
+PasteboardService                TimeService                      InputMethodService               
+ScreenlockService                WallpaperManagerService          ParamWatcher                     
+TelephonyCallManager             TelephonyCellularCall            TelephonyCellularData            
+TelephonySmsMms                  TelephonyStateRegistry           TelephonyCoreService             
+4011                             TelephonyIms                     ModuleUpdateService              
+UsbService                       WindowManagerService             DisplayManagerService            
+DSoftbus                         DeviceAuthService                DeviceManagerService             
+StorageDaemon                    StorageManager                   HdfDeviceServiceManager          
+CloudFileDaemonService           EcologicalRuleManager            UiService                        
+UiAppearanceService              CaDaemon                         AssetService                     
+9527                             65537                            65570                            
+65728                            65777                            65830                            
+65850                            65888                            65904                            
+65926                            65958                            65962                            
+66070                            66090                            70633  
+```
+
+获取到abilities后，就可以指定service获取相关的信息。 比如通过RenderService获取一些信息
+```
+$ hdc shell hidumper -s RenderService             
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------RenderService---------------------------------
+------Graphic2D--RenderSerice ------
+Usage:
+ h                             |help text for the tool
+screen                         |dump all screen infomation in the system
+surface                        |dump all surface information
+composer fps                   |dump the fps info of composer
+[surface name] fps             |dump the fps info of surface
+composer fpsClear              |clear the fps info of composer
+[windowname] fps               |dump the fps info of window
+[windowname] hitchs            |dump the hitchs info of window
+[surface name] fpsClear        |clear the fps info of surface
+nodeNotOnTree                  |dump nodeNotOnTree info
+allSurfacesMem                 |dump surface mem info
+RSTree                         |dump RSTree info
+EventParamList                 |dump EventParamList info
+allInfo                        |dump all info
+dumpMem                        |dump Cache
+trimMem cpu/gpu/shader         |release Cache
+surfacenode [id]               |dump node info
+fpsCount                       |dump the refresh rate counts info
+clearFpsCount                  |clear the refresh rate counts info
+```
+
+## RenderService
+**获取分辩率**
+```
+$ hdc shell hidumper -s RenderService -a screen 
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------RenderService---------------------------------
+-- ScreenInfo
+screen[0]: id=0, powerstatus=POWER_STATUS_OFF, backlight=21, screenType=EXTERNAL_TYPE, render size: 1260x2720, physical screen resolution: 1260x2720, isvirtual=false, skipFrameInterval_:1
+
+  supportedMode[0]: 1260x2720, refreshrate=120
+  supportedMode[1]: 1260x2720, refreshrate=90
+  supportedMode[2]: 1260x2720, refreshrate=60
+  supportedMode[3]: 1260x2720, refreshrate=30
+  activeMode: 1260x2720, refreshrate=60
+  capability: name=, phywidth=72, phyheight=156,supportlayers=12, virtualDispCount=0, propCount=0, type=DISP_INTF_HDMI, supportWriteBack=false
+```
+
+
+**获取帧率**
+首先执行如下命令进入到shell环境
+```
+$ hdc shell
+```
+然后执行`hidumper [surface name] fps` , 例如`composer fps`
+
+```
+$ hidumper -s RenderService -a "composer fps"
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------RenderService---------------------------------
+
+-- The recently fps records info of screens:
+
+The fps of screen [Id:0] is:
+107537646652857
+107537663200253
+107537679747128
+107537696352336
+107537712846086
+107537729390357
+107537745974211
+107537762468482
+107537779015357
+107537795561190
+107537812110148
+107537828651815
+107537845349732
+...
+```
+
+## DisplayManagerService
+```
+$ hdc shell hidumper -s DisplayManagerService
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------DisplayManagerService----------------------------------
+Usage:
+ -h                             |help text for the tool
+ -a                             |dump all screen information in the system
+ -z                             |switch to fold half status
+ -y                             |switch to expand status
+ -p                             |switch to fold status
+ -f                             |get to fold status
+```
+
+
+
+## PowerManagerService
+```
+$ hdc shell hidumper -s PowerManagerService
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------PowerManagerService----------------------------------
+Power manager dump options:
+  [-h] [-runninglock]
+  description of the cmd option:
+    -a: show dump info of all power modules.
+    -h: show this help.
+    -r: show the information of runninglock.
+    -s: show the information of power state machine.
+    -d: show power off dialog.
+```
+
+例如上文提到的获取屏幕状态
+```
+$ hdc shell hidumper -s PowerManagerService -a -s
+```
+
+## BatteryService
+```
+$ hdc shell hidumper -s BatteryService
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------BatteryService----------------------------------
+Usage:
+      -h: dump help
+      -i: dump battery info
+      -u: unplug battery charging state
+      -r: reset battery state
+      --capacity <capacity>: set battery capacity, the capacity range [0, 100]
+      --uevent <uevent>: set battery uevent
+```
+
+例如上文提到的获取电量温度
+```
+$ hdc shell hidumper -s BatteryService -a -i                
+```
+
+## NetConnManager
+
+```
+$ hdc shell hidumper -s NetConnManager
+
+-------------------------------[ability]-------------------------------
+
+
+----------------------------------NetConnManager----------------------------------
+Net connect Info:
+	defaultNetSupplier_ is nullptr
+	SupplierId:
+	NetId: 0
+	ConnStat: 0
+	IsAvailable:
+	IsRoaming: 0
+	Strength: 0
+	Frequency: 0
+	LinkUpBandwidthKbps: 0
+	LinkDownBandwidthKbps: 0
+	Uid: 0
+Dns result Info:
+	netId: 0
+	totalReports: 2
+	failReports: 2
+```
+
+## StorageManager
+
+
+# aa工具
+Ability assistant（Ability助手，简称为aa），是实现应用及测试用例启动功能的工具，为开发者提供基本的应用调试和测试能力，例如启动应用组件、强制停止进程、打印应用组件相关信息等。
+
+
+```
+$ hdc shell aa help
+usage: aa <command> <options>
+These are common aa commands list:
+  help                        list available commands
+  start                       start ability with options
+  stop-service                stop service with options
+  dump                        dump the ability info
+  force-stop <bundle-name>    force stop the process with bundle name
+  attach                      attach application to enter debug mdoe
+  detach                      detach application to exit debug mode
+  test                        start the test framework with options
+  appdebug                    set / cancel / get waiting debug status
+```
+
+## start
+## stop-service
+## force-stop
+## test
+## attach
+## detach
+## appdebug
+详细介绍请参考文档：https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/tools/aa-tool.md
+
+# bm工具
+Bundle Manager（包管理工具，简称bm）是实现应用安装、卸载、更新、查询等功能的工具，bm为开发者提供基本的应用安装包的调试能力，例如：安装应用，卸载应用，查询安装包信息等。
+```
+$ hdc shell bm help
+usage: bm <command> <options>
+These are common bm commands list:
+  help         list available commands
+  install      install a bundle with options
+  uninstall    uninstall a bundle with options
+  dump         dump the bundle info
+  get          obtain device udid
+  quickfix     quick fix, including query and install
+  compile      Compile the software package
+  dump-overlay dump overlay info of the specific overlay bundle
+  dump-target-overlay dump overlay info of the specific target bundle
+  dump-dependencies dump dependencies by given bundle name and module name
+  dump-shared dump inter-application shared library information by bundle name
+  clean        clean the bundle data
+```
+
+## install
+## uninstall
+## dump
+## clean
+## enable
+## disable
+## get
+
+详细介绍请参考文档：https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/tools/bm-tool.md
+
+# param工具
+param是为开发人员提供用于操作系统参数的工具，该工具只支持标准系统。
+```
+$ hdc shell param                                   
+Command list:
+    param ls [-r] [name]                            --display system parameter
+    param get [name]                                --get system parameter
+    param set name value                            --set system parameter
+    param wait name [value] [timeout]               --wait system parameter
+    param dump [verbose]                            --dump system parameter
+    param shell [-p] [name] [-u] [username] [-g] [groupname]    --shell system parameter
+    param save    
+```
+
+详细介绍请参考文档：https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/tools/param-tool.md
+
 
 # Instrument Test
 主要用来做APP 的UI自动化测试，将应用测试包安装到测试设备上，在cmd窗口中执行aa命令，完成对用例测试。
