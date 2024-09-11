@@ -100,6 +100,7 @@ HDC主要有三部分组成:
 - [参考链接](#参考链接)
 
 
+
 # HDC安装
 - 下载 [Command Line Tools](https://developer.huawei.com/consumer/cn/download/) 并解压
 - `hdc`文件在`command-line-tools/sdk/HarmonyOS-NEXT-DB2/openharmony/toolchains`目录下
@@ -114,11 +115,11 @@ export HDC_SERVER_PORT=7035
 
 # 基本用法
 ## 基本语法
-```
+```shell
 hdc -t <connectKey> <command>
 ```
 如果只有一个设备/模拟器连接时，可以省略掉`-t <connectKey>` 这一部分，直接使用`hdc <command>`。在多个设备/模拟器连接的情况下需要指定`-t` 参数， `connectKey`可以通过`hdc list targets`命令获取，对应Android里的`adb devices`获取的`serialNumber`。
-```
+```shell
 $ hdc list targets
 
 127.0.0.1:5555    //<IP>:<Port>形式的connectKey ，一般为无线连接的设备或模拟器
@@ -127,7 +128,7 @@ FMR0223C13000649
 
 
 比如给`FMR0223C13000649` 这个设备安装应用：
-```
+```shell
 $ hdc -t FMR0223C13000649 install entry-default-signed.hap
 
 [Info]App install path:/Users/develop/entry-default-signed.hap, queuesize:0, msg:install bundle successfully.
@@ -141,7 +142,7 @@ AppMod finish
 
 # 设备连接管理
 ## 查看HDC版本
-```
+```shell
 $ hdc -v
 
 Ver: 2.0.0a
@@ -150,14 +151,14 @@ Ver: 2.0.0a
 
 ## 启动/停止 HDC Server
 停止
-```
+```shell
 $ hdc kill
 
 Kill server finish
 ```
 
 重启
-```
+```shell
 $ hdc start -r
 ```
 
@@ -180,7 +181,7 @@ FMR0223C13000649		USB	  Connected	  unknown...
 输出的内容第一列为设备的`connectKey`， 第二列是设备`连接方式`，第三列为设备`连接状态`，第四列暂时未知
 
 ## 查询设备UDID
-```
+```shell
 $ hdc shell bm get --udid
 
 udid of current device is :
@@ -190,7 +191,7 @@ C46284C052AE01BBD2358FE44B279524B508FC959AAB5F4B0B74E42A06569B7E
 这个`udid`在用开发者账号打包时，需要添加这个`udid`到对应的`profile`文件中
 
 ## 重启手机
-```
+```shell
 $ hdc target boot
 
 ```
@@ -199,45 +200,45 @@ $ hdc target boot
 # 查看设备信息
 
 ## 名称
-```
+```shell
 $ hdc shell param get const.product.name               
 
 HUAWEI Mate 60 Pro
 ```
 ## Brand
-```
+```shell
 $ hdc shell param get const.product.brand
 
 HUAWEI 
 ```
 ## Model
-```
+```shell
 $ hdc shell param get const.product.model
 
 ALN-AL00 
 ```
 ## 系统版本
-```
+```shell
 $ hdc shell param get const.product.software.version                                      
 
 ALN-AL00 5.0.0.22(SP35DEVC00E22R4P1log) 
 ```
 
 ## OS版本
-```
+```shell
 $ hdc shell param get const.ohos.apiversion  
 
 12 
 ```
 
 ## CPU架构
-```
+```shell
 $ hdc  shell param get const.product.cpu.abilist  
 
 arm64-v8a 
 ```
 ## 分辩率
-```
+```shell
 $ hdc shell hidumper -s RenderService -a screen
 
 
@@ -259,7 +260,7 @@ screen[0]: id=0, powerstatus=POWER_STATUS_OFF, backlight=51, screenType=EXTERNAL
 执行上述命令后，解析返回内容，可以通过正则表达式提取`1260x2720`
 
 ## wlan IP
-```
+```shell
 $ hdc shell ifconfig
 
 lo        Link encap:Local Loopback
@@ -297,7 +298,7 @@ chba0     Link encap:Ethernet  HWaddr ec:11:05:fb:18:66
 
 ## 电量/温度
 
-```
+```shell
 $ hdc shell hidumper -s BatteryService -a -i                
 
 -------------------------------[ability]-------------------------------
@@ -323,7 +324,7 @@ chargeType: 1
 ```
 
 ## 查看屏幕信息
-```
+```shell
 $ hdc shell hidumper -s DisplayManagerService -a -a
 
 -------------------------------[ability]-------------------------------
@@ -395,7 +396,7 @@ DefaultDeviceRotationOffset   0
 
 ## 查看屏幕旋转状态
 
-```
+```shell
 $ hdc shell hidumper -s DisplayManagerService -a -a
 ```
 通过上面的查看屏幕信息命令，通过正则提取ScreenRotation字段即可，ScreenRotation有四个值：
@@ -407,7 +408,7 @@ $ hdc shell hidumper -s DisplayManagerService -a -a
 备注：目前旋转状态只能查看，不支持设置
 
 ## 查看屏幕亮屏状态
-```
+```shell
 $ hdc shell hidumper -s PowerManagerService -a -s
 
 -------------------------------[ability]-------------------------------
@@ -458,7 +459,7 @@ State: DIM   Reason: TIMEOUT   Time: 467797280
 
 
 ## 点亮屏幕（唤醒）
-```
+```shell
 $ hdc shell power-shell wakeup
 
 WakeupDevice is called
@@ -467,7 +468,7 @@ WakeupDevice is called
 ## 查看网络状态
 
 **联网状态**
-```
+```shell
 $ hdc shell hidumper -s NetConnManager
 
 -------------------------------[ability]-------------------------------
@@ -493,7 +494,7 @@ Dns result Info:
 ```
 
 **wifi信息**
-```
+```shell
 $ hdc shell hidumper -s WifiDevice
 
 -------------------------------[ability]-------------------------------
@@ -519,14 +520,14 @@ Country Code: CN
 
 # 应用管理
 ## 安装应用
-```
+```shell
 $ hdc app install entry-default-signed.hap
 
 [Info]App install path:/Users/develop/entry-default-signed.hap, queuesize:0, msg:install bundle successfully.
 AppMod finish
 ```
 或者
-```
+```shell
 $ hdc install entry-default-signed.hap
 
 [Info]App install path:/Users/develop/entry-default-signed.hap, queuesize:0, msg:install bundle successfully.
@@ -535,7 +536,7 @@ AppMod finish
 
 
 ## 卸载应用
-```
+```shell
 $ hdc app uninstall com.kk.hmscrcpy
 
 [Info]App uninstall path:, queuesize:0, msg:uninstall bundle successfully.
@@ -543,7 +544,7 @@ AppMod finish
 ```
 
 或者
-```
+```shell
 $ hdc uninstall com.kk.hmscrcpy
 
 [Info]App uninstall path:, queuesize:0, msg:uninstall bundle successfully.
@@ -552,7 +553,7 @@ AppMod finish
 
 
 ## 获取应用列表
-```
+```shell
 $ hdc shell bm dump -a
 
 ID: 100:
@@ -574,7 +575,7 @@ ID: 100:
 
 ## 启动应用
 通过启动`Ability`来拉起`APP`
-```
+```shell
 hdc shell aa start -a {abilityName} -b {bundleName} 
 
 ```
@@ -583,7 +584,7 @@ hdc shell aa start -a {abilityName} -b {bundleName}
 
 -  其中`abilityName`可以通过如下命令获取（查看当前任务栈的ability信息）
 
-```
+```shell
 $ hdc shell aa dump -l    # 运行命令前需要手动打开app
 
 User ID #100
@@ -605,7 +606,7 @@ User ID #100
 
 ## 退出应用
 强制退出应用
-```
+```shell
 hdc shell aa force-stop {bundleName} 
 ```
 
@@ -613,7 +614,7 @@ hdc shell aa force-stop {bundleName}
 
 
 ## 获取应用版本
-```
+```shell
 $ hdc shell bm dump -n {bundleName}
 ```
 执行上述命令后，再解析json, 提取`versionName`字段即可
@@ -621,7 +622,7 @@ $ hdc shell bm dump -n {bundleName}
 
 ## Dump应用信息
 **aa dump**
-```
+```shell
 $ hdc shell aa dump -h
 
 usage: aa dump <options>
@@ -640,7 +641,7 @@ options list:
 ```
 
 **bm dump**
-```
+```shell
 $ hdc shell bm dump -h
 
 usage: bm dump <options>
@@ -654,7 +655,7 @@ options list:
 ```
 
 ### 获取应用 Ability信息
-```
+```shell
 $ hdc shell aa dump -l    //运行命令前需要手动打开app
 
 User ID #100
@@ -678,7 +679,7 @@ User ID #100
 
 查询该应用的详细信息
 
-```
+```shell
 $ hdc shell bm dump -n com.kuaishou.hmapp
 
 com.kuaishou.hmapp:
@@ -762,7 +763,7 @@ com.kuaishou.hmapp:
 
 
 ## 清除应用数据
-```
+```shell
 $ hdc shell bm clean -h
 
 usage: bm clean <options>
@@ -776,7 +777,7 @@ options list:
 
 
 ### 清除应用缓存
-```
+```shell
 $ hdc shell bm clean -n {bundleName}  -c
 
 clean bundle cache files successfully.
@@ -785,13 +786,13 @@ clean bundle cache files successfully.
 其中`bundleName`可以通过`hdc shell bm dump -a`获取， 比如`com.kuaishou.hmapp`
 
 ### 清除应用数据
-```
+```shell
 $ hdc shell bm clean -n {bundleName} -d 
 ```
                 
 
 ## 显示可调试应用列表
-```
+```shell
 $  hdc jpid
 
 2571
@@ -826,7 +827,7 @@ $ hdc track-jpid
 
 ## 显示端口转发列表
 展示电脑端口转发到手机端口的列表
-```
+```shell
 $ hdc fport ls
 
 FMR0223C13000649    tcp:7912 tcp:7912    [Forward]
@@ -834,7 +835,7 @@ FMR0223C13000649    tcp:7912 tcp:7912    [Forward]
 
 ## 本地端口转发到手机
 将本地电脑的`7913`端口转发到手机`7912`端口
-```
+```shell
 $ hdc fport tcp:7913 tcp:7912
 
 Forwardport result:OK
@@ -844,7 +845,7 @@ Forwardport result:OK
 
 
 ## 删除端口转发任务
-```
+```shell
 $ hdc fport rm tcp:7913 tcp:7912
 Remove forward ruler success, ruler:tcp:7913 tcp:7912
 
@@ -861,7 +862,7 @@ $ hdc fport ls
 
 **示例**
 
-```
+```shell
 $ hdc tmode port 5555
 
 $ hdc tconn 172.31.124.84:5555
@@ -887,7 +888,7 @@ Set device run mode successful.
 |file recv remote local|	从远端设备发送文件至本地|
 
 ## 从本地电脑发送文件至手机
-```
+```shell
 $ hdc file send ~/layout_407568854.json /data/local/tmp/layout_407568854.json
 
 FileTransfer finish, Size:71792, File count = 1, time:24ms rate:2991.33kB/s
@@ -895,7 +896,7 @@ FileTransfer finish, Size:71792, File count = 1, time:24ms rate:2991.33kB/s
 
 
 ## 从手机拷贝文件至本地电脑
-```
+```shell
 $ hdc file recv /data/local/tmp/layout_407568854.json ~/layout_407568854.json
 
 [I][2024-05-28 20:15:45] HdcFile::TransferSummary success
@@ -918,7 +919,7 @@ FileTransfer finish, Size:71792, File count = 1, time:12ms rate:5982.67kB/s
 | keyEvent    | 模拟实体按键事件(如:键盘,电源键,返回上一级,返回桌面等),以及组合按键操作 | keyID (必选参数,实体按键对应ID)<br>keyID2 (可选参数,实体按键对应ID)                                                                                               | hdc shell uitest uiInput keyEvent keyID                                                         |
 
 **举例**
-```
+```shell
 //点击
 hdc shell uitest uiInput click 100 100
 
@@ -970,7 +971,7 @@ hdc shell uitest uiInput keyEvent 2072 2038
 hdc提供了两种截图命令
 
 方式一
-```
+```shell
 $ hdc shell uitest screenCap
 // 默认存储路径：/data/local/tmp，文件名：时间戳 + .png。
 
@@ -980,7 +981,7 @@ $ hdc shell uitest screenCap -p /data/local/tmp/1.png
 
 
 【推荐】方式二
-```
+```shell
 $ hdc shell snapshot_display -f /data/local/tmp/2.jpeg
 // 截图完成后可以通过 hdc file recv 命令导入到本地
 ```
@@ -991,7 +992,7 @@ $ hdc shell snapshot_display -f /data/local/tmp/2.jpeg
 相关hdc命令还未支持，官方在开发中。。。
 
 我这边通过python脚本实现了录屏功能，使用方法如下
-```
+```shell
 cd awesome-hdc/scripts
 pip3 install -r requirements.txt
 
@@ -999,7 +1000,7 @@ python3 screen_recroding.py
 ```
 
 # 打开Scheme (URL)
-```
+```shell
 $ hdc shell aa start -U http://www.baidu.com
 start ability successfully.
 
@@ -1008,14 +1009,14 @@ $ hdc shell aa start -U kwai://home
 ```
 
 # 获取页面布局信息（控件树）
-```
+```shell
 $ hdc shell uitest dumpLayout -p {saveDumpPath}   # 运行命令前需要手动打开app，进入对应页面
 
 DumpLayout saved to:/data/local/tmp/layout_407568854.json
 ```
 -  `-p`表示控件树保存的目录，如果不指定，则默认保存在手机的`/data/local/tmp`目录
 `/data/local/tmp/layout_407568854.json`文件内容如下：
-```
+```shell
 {
     "attributes": {
         "accessibilityId": "",
@@ -1046,7 +1047,7 @@ DumpLayout saved to:/data/local/tmp/layout_407568854.json
 
 # 录制用户操作
 将当前界面操作记录到`/data/local/tmp/layout/record.csv`，结束录制操作使用`Ctrl+C`结束录制
-```
+```shell
 $  hdc shell uitest uiRecord record
 
 windowBounds : (0,0,1260,2720)
@@ -1074,12 +1075,12 @@ home , fingerNumber:1 ,
 - `uiRecord read`,   将文件内容打印到控制台
 
 录制完成后，再将`csv`文件拷贝到电脑上
-```
+```shell
 $ hdc file recv  /data/local/tmp/layout/record.csv ~/record.csv
 ```
 
 `record`数据字段含义请参考如下示例数据
-```
+```shell
 {
   "ABILITY": "com.ohos.launcher.MainAbility", // 前台应用界面
   "BUNDLE": "com.ohos.launcher", // 操作应用
@@ -1118,7 +1119,7 @@ $ hdc file recv  /data/local/tmp/layout/record.csv ~/record.csv
 ```
 
 # 系统日志（log）
-```
+```shell
 $ hdc hilog -h
 
 Usage:
@@ -1280,18 +1281,18 @@ Dictionary description:
 ```
 
 # 导出日志
-```
+```shell
 $ hdc file recv data/log/hilog/ ./
 
 ```
 # 导出crash日志
-```
+```shell
 hdc file recv data/log/faultlog/faultlogger/ ./
 
 ```
 
 # hidumper工具
-```
+```shell
 $ hdc shell hidumper -h
 
 usage:
@@ -1317,7 +1318,7 @@ usage:
 ```
 
 ## list system abilities
-```
+```shell
 $ hdc shell hidumper -ls
 
 System ability list:
@@ -1367,7 +1368,7 @@ UiAppearanceService              CaDaemon                         AssetService
 ```
 
 获取到abilities后，就可以指定service获取相关的信息。 比如通过RenderService获取一些信息
-```
+```shell
 $ hdc shell hidumper -s RenderService             
 
 -------------------------------[ability]-------------------------------
@@ -1399,7 +1400,7 @@ clearFpsCount                  |clear the refresh rate counts info
 
 ## RenderService
 **获取分辩率**
-```
+```shell
 $ hdc shell hidumper -s RenderService -a screen 
 
 -------------------------------[ability]-------------------------------
@@ -1420,7 +1421,7 @@ screen[0]: id=0, powerstatus=POWER_STATUS_OFF, backlight=21, screenType=EXTERNAL
 
 **获取帧率**
 首先执行如下命令进入到shell环境
-```
+```shell
 $ hdc shell
 ```
 然后执行`hidumper [surface name] fps` , 例如`composer fps`
@@ -1453,7 +1454,7 @@ The fps of screen [Id:0] is:
 ```
 
 ## DisplayManagerService
-```
+```shell
 $ hdc shell hidumper -s DisplayManagerService
 
 -------------------------------[ability]-------------------------------
@@ -1472,7 +1473,7 @@ Usage:
 
 
 ## PowerManagerService
-```
+```shell
 $ hdc shell hidumper -s PowerManagerService
 
 -------------------------------[ability]-------------------------------
@@ -1490,12 +1491,12 @@ Power manager dump options:
 ```
 
 例如上文提到的获取屏幕状态
-```
+```shell
 $ hdc shell hidumper -s PowerManagerService -a -s
 ```
 
 ## BatteryService
-```
+```shell
 $ hdc shell hidumper -s BatteryService
 
 -------------------------------[ability]-------------------------------
@@ -1512,13 +1513,13 @@ Usage:
 ```
 
 例如上文提到的获取电量温度
-```
+```shell
 $ hdc shell hidumper -s BatteryService -a -i                
 ```
 
 ## NetConnManager
 
-```
+```shell
 $ hdc shell hidumper -s NetConnManager
 
 -------------------------------[ability]-------------------------------
@@ -1544,7 +1545,7 @@ Dns result Info:
 ```
 
 ## MemoryManagerService
-```
+```shell
 $ hdc shell hidumper -s MemoryManagerService
 
 -------------------------------[ability]-------------------------------
@@ -1589,7 +1590,7 @@ TODO
 Ability assistant（Ability助手，简称为aa），是实现应用及测试用例启动功能的工具，为开发者提供基本的应用调试和测试能力，例如启动应用组件、强制停止进程、打印应用组件相关信息等。
 
 
-```
+```shell
 $ hdc shell aa help
 usage: aa <command> <options>
 These are common aa commands list:
@@ -1645,7 +1646,7 @@ These are common bm commands list:
 
 # param工具
 param是为开发人员提供用于操作系统参数的工具，该工具只支持标准系统。
-```
+```shell
 $ hdc shell param                                   
 Command list:
     param ls [-r] [name]                            --display system parameter
@@ -1673,7 +1674,7 @@ Command list:
 | NA            | -s           | 特定参数，以 <key, value> 键值对方式传入  | -s unittest /ets/testrunner/OpenHarmonyTestRunner           |
 
 
-```
+```shell
 $ hdc shell aa test -h
 usage: aa test <options>
 options list:
@@ -1692,12 +1693,12 @@ options list:
 ```
 
 **举例**
-```
+```shell
 $ hdc shell aa test -b com.example.myapplication -m entry_test -s unittest /ets/testrunner/OpenHarmonyTestRunner -s class UiTestDemo timeout 15000
 ```
 查看测试结果
 cmd模式执行过程,会打印如下相关日志信息。
-```
+```shell
 OHOS_REPORT_STATUS: class=testStop
 OHOS_REPORT_STATUS: current=1
 OHOS_REPORT_STATUS: id=JS
@@ -1732,7 +1733,7 @@ OHOS_REPORT_STATUS: taskconsuming=16029
 - TEMP：每秒读取一次设备节点下电池温度、系统芯片温度等信息。
 - RAM：每秒读取一次应用进程的实际物理内存，衡量应用的内存占比情况。
 - snapshot：每秒截取一张应用界面截图。
-```
+```shell
 $ hdc shell
 
 # SP_daemon
@@ -1744,7 +1745,7 @@ root          1595  1574 3 21:51:02 pts/0 00:00:00 grep SP_daemon
 
 ```
 执行查看帮助命令
-```
+```shell
 # SP_daemon --help
 OpenHarmony performance testing tool SmartPerf command-line version
 Usage: SP_daemon [options] [arguments]
