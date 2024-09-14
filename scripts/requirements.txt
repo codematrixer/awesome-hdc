@@ -1,2 +1,1 @@
-opencv-python==4.5.3.56; platform.machine != 'arm64'
-opencv-python==4.7.0.72; platform.machine == 'arm64'
+opencv-python-headless

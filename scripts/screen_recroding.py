@@ -9,11 +9,11 @@ import subprocess
 import atexit
 import hashlib
 import threading
-import numpy as np
 from queue import Queue
 from datetime import datetime
 
 import cv2
+import numpy as np
 
 from functools import cached_property
 
@@ -31,6 +31,9 @@ class HmScreenRecorder:
         self.jpeg_queue = Queue()
         self.threads: typing.List[threading.Thread] = []
         self.stop_event = threading.Event()
+
+        if not self.hdc.is_online():
+            raise RuntimeError(f"Device [{serial}] not found")
 
         # Register the instance method to be called at exit
         atexit.register(self._rm_local_port)
@@ -181,9 +184,9 @@ class HmScreenRecorder:
 
         def __get_remote_md5sum() -> str:
             """Get the MD5 checksum of the file on the device."""
-            command = "md5sum /data/local/tmp/agent.so | awk '{ print $1 }'"
-            result = self.hdc.shell(command).output.strip()
-            return result
+            command = "md5sum /data/local/tmp/agent.so"
+            data = self.hdc.shell(command).output.strip()
+            return data.split()[0]
 
         def __get_local_md5sum(f: str) -> str:
             """Calculate the MD5 checksum of a local file."""
@@ -209,10 +212,11 @@ class HmScreenRecorder:
         shell        44416     1 2 11:03:42 ?     00:00:01 uitest start-daemon com.krunner.hm.atx@4x9@1"
         """
         try:
-            # pids: list = self.hdc.shell("pidof uitest").output.strip().split()
-            result = self.hdc.shell("ps -ef | grep uitest | grep singleness").output.strip()
+            result = self.hdc.shell("ps -ef").output.strip()
             lines = result.splitlines()
-            for line in lines:
+            filtered_lines = [line for line in lines if 'uitest' in line and 'singleness' in line]
+
+            for line in filtered_lines:
                 if 'uitest start-daemon singleness' in line:
                     parts = line.split()
                     pid = parts[1]

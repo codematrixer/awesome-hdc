@@ -71,6 +71,10 @@ class HdcWrapper:
     def __init__(self, serial: str) -> None:
         self.serial = serial
 
+    def is_online(self) -> bool:
+        serials = list_devices()
+        return True if self.serial in serials else False
+
     def forward_port(self, rport: int) -> int:
         lport: int = _FreePort().get()
         result = _execute_command(f"hdc -t {self.serial} fport tcp:{lport} tcp:{rport}")
@@ -130,8 +134,8 @@ class HdcWrapper:
         return [item.strip() for item in raw]
 
     def has_app(self, package_name: str) -> bool:
-        data = self.shell(f"bm dump -a | grep {package_name}").output
-        return True if data else False
+        data = self.shell("bm dump -a").output
+        return True if package_name in data else False
 
     def start_app(self, package_name: str, ability_name: str):
         return self.shell(f"aa start -a {ability_name} -b {package_name}")
