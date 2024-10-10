@@ -8,9 +8,7 @@ HDC主要有三部分组成:
 2. `hdc server`：作为后台进程也运行于电脑上，server管理client和设备端daemon之间通信包括连接的复用、数据通信包的收发，以及个别本地命令的直接处理。
 3. `hdc daemon`：daemon部署于OpenHarmony设备端作为守护进程按需运行，负责处理来自client端请求。
 
-![avatar](/docs/arch.png)
-
-整体架构和Android系统的ADB架构非常类似。
+![hdc](https://i.ibb.co/WHpLY3y/hdc.png)
 
 
 **Table of Contents**
@@ -856,30 +854,62 @@ $ hdc fport ls
 同理，`rport`命令表示手机端口转发到电脑端口，我就不一一举例了.
 
 # 无线调试
-1. 在手机上开启5555端口 `hdc -t {SERIAL} tmode port {PORT}`
-2. 连接手机上的端口 `hdc  -t {SERIAL} tconn {WLANIP}:{PORT}`
-3. 恢复手机USB连接 `hdc -t {SERIAL} tmode usb`
+**方式一：通过手机ip进行连接** (这个方式需要手机和PC处于同一个局域网内)
+1. 在手机上开启tcp端口 `hdc -t <serial> tmode port <port>`
+2. 连接手机上的tcp端口 `hdc tconn <wlan_ip>:<port>`
+3. 关闭无线连接 `hdc -t <serial> tmode port close`
 
-**示例**
+示例
 
 ```shell
-$ hdc tmode port 5555
+$ hdc -t FMR0223C13000649 tmode port 5555
 
-$ hdc tconn 172.31.124.84:5555
+$ hdc tconn 172.31.124.84:5555   # 这个ip为手机的wlanIp
 Connect OK
 
 $ hdc list targets
 172.31.124.84:5555
+FMR0223C13000649
 
-$ hdc tmode usb      
+$ hdc -t 172.31.124.84:5555 tmode port close
 Set device run mode successful.
-
 ```
 
-不过目前这个无线调试，会导致该手机USB连接方式断开，导致无法进行端口转发，每次进行无线调试时，需要知道手机的wlanip才行。
-这个问题也在和鸿蒙方沟通，待解决。
-记个TODO.
+**方式二：通过PC的ip进行连接** （这个方式数据线不能拔掉）
+1. 在手机上开启5555端口 `hdc -t <serial> tmode port <port>`
+2. 将手机的端口转发到PC上 `hdc -t <serial> fport tcp:<host_port> tcp:<port>`
+3. 连接PC上的端口 `hdc tconn 127.0.0.1:{host_port}`
+4. 关闭无线连接 `hdc -t <serial> tmode port close`
 
+示例
+
+```shell
+$ hdc -t FMR0223C13000649 tmode port 5555
+
+$ hdc -t FMR0223C13000649 fport tcp:5556 tcp:5555
+Forwardport result:OK
+
+$ hdc tconn 127.0.0.1:5556
+Connect OK
+
+$ hdc list targets
+127.0.0.1:5556
+FMR0223C13000649
+
+$ hdc -t FMR0223C13000649 tmode port close
+Set device run mode successful.
+```
+
+**！！注意！！** 方式二中，由于hdc服务只监听了127.0.0.1， 导致其他主机上无法访问，需要将端口再转发一下，可以用socat等工具进行转发
+```
+$ socat TCP-LISTEN:5557,fork TCP:localhost:5556
+```
+
+然后在其他主机进行connect
+```
+$ hdc tconn <host_ip>:5557
+Connect OK
+```
 
 # 文件传输
 |命令|	说明|
