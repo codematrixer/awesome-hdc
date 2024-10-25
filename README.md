@@ -101,15 +101,15 @@ HDC主要有三部分组成:
 
 # HDC安装
 - 下载 [Command Line Tools](https://developer.huawei.com/consumer/cn/download/) 并解压
-- `hdc`文件在`command-line-tools/sdk/HarmonyOS-NEXT-DB2/openharmony/toolchains`目录下
+- `hdc`文件在`command-line-tools/sdk/default/openharmony/toolchains`目录下
 
 - 配置电脑环境变量，以macOS为例，在`~/.bash_profile` 或者 `~/.zshrc`文件中添加如下内容：
 ```
-export HM_SDK_HOME="/Users/develop/command-line-tools/sdk/HarmonyOS-NEXT-DB2"  //请以sdk实际安装目录为准
+export HM_SDK_HOME="/Users/develop/command-line-tools/sdk/default"  //请以sdk实际安装目录为准
 export PATH=$PATH:$HM_SDK_HOME/hms/toolchains:$HM_SDK_HOME/openharmony/toolchains
 export HDC_SERVER_PORT=7035
 ```
-也可以自行编译安装：参考鸿蒙官方gitree文档
+也可以自行编译安装：参考鸿蒙官方gitee文档
 
 # 基本用法
 ## 基本语法
